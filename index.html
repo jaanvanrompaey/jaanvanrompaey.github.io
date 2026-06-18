@@ -27,24 +27,24 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             font-family: var(--font-main);
-            font-size: 14px; /* Cargo uses small, compact text */
+            font-size: 14px;
             line-height: 1.4;
             overflow: hidden; /* Hide body scroll, we scroll columns */
         }
 
         /* =========================================
-           2. LAYOUT (3 Independent Columns)
+           2. LAYOUT (2 Independent Columns)
            ========================================= */
         .layout-container {
             display: grid;
-            grid-template-columns: 280px 1fr 320px; /* Left | Middle | Right */
+            grid-template-columns: 300px 1fr; /* Left Sidebar | Main Content */
             height: 100vh; /* Full viewport height */
             width: 100vw;
         }
 
         /* Common Column Styles */
         .column {
-            padding: 20px;
+            padding: 40px;
             overflow-y: auto; /* Independent scrolling */
             scrollbar-width: thin; /* Firefox scrollbar styling */
             scrollbar-color: #333 transparent;
@@ -59,68 +59,89 @@
             border-radius: 3px;
         }
 
-        /* Left Column: Navigation & Metadata */
+        /* Left Column: Navigation & Thumbnails */
         .col-left {
             border-right: 1px solid #222;
+            padding: 40px 30px;
         }
 
-        /* Middle Column: Main Content */
-        .col-center {
-            padding: 0; /* Full bleed images */
-        }
-
-        /* Right Column: Bio & Info */
+        /* Right Column: Main Content */
         .col-right {
-            border-left: 1px solid #222;
+            padding: 40px 60px;
         }
 
         /* =========================================
-           3. LEFT COLUMN STYLES
+           3. LEFT COLUMN STYLES (The Gallery List)
            ========================================= */
-        .brand {
-            font-size: 12px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 40px;
-            color: var(--text-muted);
-        }
-
         .project-list {
             list-style: none;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 40px; /* Space between projects */
         }
 
         .project-item {
-            margin-bottom: 30px;
-            cursor: pointer;
+            cursor: default;
         }
 
         .project-title {
             font-size: 16px;
             font-weight: 500;
-            margin-bottom: 4px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .project-date {
             font-size: 12px;
             color: var(--text-muted);
+            margin-bottom: 15px;
         }
 
-        .metadata-footer {
-            margin-top: 60px;
-            font-size: 11px;
-            color: var(--text-muted);
-            line-height: 1.6;
+        /* The Thumbnail Image Style */
+        .project-thumb {
+            width: 100%;
+            height: 180px; /* Fixed height for thumbnails */
+            background-color: var(--accent-gray);
+            border: 1px solid var(--border-color);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* The Diagonal Line Effect (Cargo Style) */
+        .project-thumb::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom right, transparent 49.5%, white 49.5%, white 50.5%, transparent 50.5%);
+            opacity: 0.3;
+        }
+
+        .thumb-label {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            font-size: 10px;
+            color: white;
+            opacity: 0.7;
         }
 
         /* =========================================
-           4. MIDDLE COLUMN STYLES (Images & Text)
+           4. RIGHT COLUMN STYLES (Main Content)
            ========================================= */
         .main-content {
-            padding: 40px 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 80px; /* Large gap between main projects */
         }
 
-        /* The "Cargo" Placeholder Image Style */
+        /* The "Cargo" Large Placeholder Image */
         .cargo-image-placeholder {
             width: 100%;
             height: 60vh; /* Large image */
@@ -133,7 +154,7 @@
             justify-content: center;
         }
 
-        /* The Diagonal Line Effect */
+        /* The Diagonal Line Effect for Large Images */
         .cargo-image-placeholder::after {
             content: '';
             position: absolute;
@@ -145,25 +166,6 @@
             opacity: 0.3;
         }
 
-        /* Thumbnail Row */
-        .thumbnail-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 40px;
-        }
-
-        .thumb {
-            width: 100px;
-            height: 140px;
-            background-color: var(--accent-gray);
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: flex-end;
-            padding: 5px;
-            font-size: 10px;
-            color: var(--text-muted);
-        }
-
         /* Text Block */
         .content-text {
             max-width: 600px;
@@ -173,50 +175,7 @@
         }
 
         /* =========================================
-           5. RIGHT COLUMN STYLES (Lists & Bio)
-           ========================================= */
-        .info-section {
-            margin-bottom: 40px;
-        }
-
-        .section-label {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
-            color: var(--text-muted);
-            display: block;
-        }
-
-        .info-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .info-item {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #333; /* Separator line */
-        }
-
-        .info-item:last-child {
-            border-bottom: none;
-        }
-
-        .info-role {
-            font-weight: 500;
-            margin-bottom: 4px;
-            display: block;
-        }
-
-        .info-detail {
-            font-size: 12px;
-            color: var(--text-muted);
-            display: block;
-        }
-
-        /* =========================================
-           6. RESPONSIVE (Mobile)
+           5. RESPONSIVE (Mobile)
            ========================================= */
         @media (max-width: 900px) {
             .layout-container {
@@ -232,6 +191,9 @@
             .cargo-image-placeholder {
                 height: 40vh;
             }
+            .project-thumb {
+                height: 120px;
+            }
         }
     </style>
 </head>
@@ -239,133 +201,88 @@
 
     <div class="layout-container">
         
-        <!-- LEFT COLUMN: Navigation & Metadata -->
+        <!-- LEFT COLUMN: Scrollable List of Titles + Thumbnails -->
         <aside class="column col-left">
-            <div class="brand">Cargo® Demo</div>
-            
-            <!-- Edit Project List Here -->
             <ul class="project-list">
+                
+                <!-- Project 1 -->
                 <li class="project-item">
                     <div class="project-title">Project 03</div>
                     <div class="project-date">August 24 2042</div>
+                    <!-- EDIT: Replace this div with <img src="your-image.jpg" class="project-thumb"> -->
+                    <div class="project-thumb">
+                        <span class="thumb-label">Cargo® Placeholder</span>
+                    </div>
                 </li>
+
+                <!-- Project 2 -->
                 <li class="project-item">
                     <div class="project-title">Project 02</div>
                     <div class="project-date">August 24 2042</div>
+                    <!-- EDIT: Replace this div with <img src="your-image.jpg" class="project-thumb"> -->
+                    <div class="project-thumb">
+                        <span class="thumb-label">Cargo® Placeholder</span>
+                    </div>
                 </li>
+
+                <!-- Project 3 -->
                 <li class="project-item">
                     <div class="project-title">Project 01</div>
                     <div class="project-date">August 24 2042</div>
+                    <!-- EDIT: Replace this div with <img src="your-image.jpg" class="project-thumb"> -->
+                    <div class="project-thumb">
+                        <span class="thumb-label">Cargo® Placeholder</span>
+                    </div>
                 </li>
-            </ul>
 
-            <!-- Edit Footer Metadata Here -->
-            <div class="metadata-footer">
-                <p>Authors: Zeus Tutu & Tito Penrose</p>
-                <p>Edited by: Dusty Acres & Mitch Glitch</p>
-                <p>92pp, Hardback, 24 x 32 cm</p>
-                <p>ISBN: 978-82-697000-0-0</p>
-                <p>Printed by: Cargo® Press Ltd</p>
-            </div>
+            </ul>
         </aside>
 
-        <!-- MIDDLE COLUMN: Main Content -->
-        <main class="column col-center">
+        <!-- RIGHT COLUMN: Scrollable Main Content (Large Images + Text) -->
+        <main class="column col-right">
             <div class="main-content">
                 
-                <!-- Large Placeholder Image -->
-                <!-- Replace this div with your <img src="..."> tag when ready -->
-                <div class="cargo-image-placeholder">
-                    <span style="position:absolute; bottom: 10px; left: 10px; font-size: 10px; color: white;">Cargo® Placeholder Image · cargo.site</span>
-                </div>
+                <!-- Main Project 1 -->
+                <article>
+                    <!-- EDIT: Replace this div with <img src="your-image.jpg" class="cargo-image-placeholder"> -->
+                    <div class="cargo-image-placeholder">
+                        <span class="thumb-label">Cargo® Placeholder Image · cargo.site</span>
+                    </div>
+                    
+                    <div class="content-text">
+                        <!-- EDIT TEXT HERE -->
+                        <p>[...] Vestibulum et dignissim magna. Nullam at ultrices felis. Suspendisse facilisis sagittis sem sit amet tempor. Nam sit amet nibh et enim laoreet porta sit amet vel purus. Maecenas augue velit, feugiat in maximus id, auctor vel ex. Integer placerat lectus mi, vel molestie neque dictum at. Vivamus sed sapien: fermentum, fermentum, metus ut, efficitur nunc. Pellentesque sit amet ex sed est dapibus vestibulum.</p>
+                    </div>
+                </article>
 
-                <!-- Thumbnail Row -->
-                <div class="thumbnail-row">
-                    <div class="thumb">Cargo®<br>3.1</div>
-                    <div class="thumb">Cargo®<br>3.2</div>
-                    <div class="thumb">Cargo®<br>3.3</div>
-                </div>
+                <!-- Main Project 2 -->
+                <article>
+                    <!-- EDIT: Replace this div with <img src="your-image.jpg" class="cargo-image-placeholder"> -->
+                    <div class="cargo-image-placeholder">
+                        <span class="thumb-label">Cargo® Placeholder Image · cargo.site</span>
+                    </div>
+                    
+                    <div class="content-text">
+                        <!-- EDIT TEXT HERE -->
+                        <p>Vivamus sed sapien fermentum, fermentum metus ut, efficitur nunc. Pellentesque sit amet ex sed est dapibus vestibulum. Donec ornare urna metus, ut mollis risus dignissim in. Phasellus tristique sed leo et dignissim. Nam lobortis vitae leo at finibus. Aliquam eget efficitur lacus.</p>
+                    </div>
+                </article>
 
-                <!-- Text Content -->
-                <div class="content-text">
-                    <!-- EDIT TEXT HERE -->
-                    <p>[...] Vestibulum et dignissim magna. Nullam at ultrices felis. Suspendisse facilisis sagittis sem sit amet tempor. Nam sit amet nibh et enim laoreet porta sit amet vel purus. Maecenas augue velit, feugiat in maximus id, auctor vel ex. Integer placerat lectus mi, vel molestie neque dictum at. Vivamus sed sapien: fermentum, fermentum, metus ut, efficitur nunc. Pellentesque sit amet ex sed est dapibus vestibulum.</p>
-                </div>
+                <!-- Main Project 3 -->
+                <article>
+                    <!-- EDIT: Replace this div with <img src="your-image.jpg" class="cargo-image-placeholder"> -->
+                    <div class="cargo-image-placeholder">
+                        <span class="thumb-label">Cargo® Placeholder Image · cargo.site</span>
+                    </div>
+                    
+                    <div class="content-text">
+                        <!-- EDIT TEXT HERE -->
+                        <p>Mauris leo erat, placerat quis semper eu, pulvinar in est. Nam eget justo quis ligula faucibus pretium ac nec mi. Aliquam lacus est, auctor sed arcu at, luctus condimentum lectus. Quisque vitae eleifend quam, vel suscipit nisl. Duis efficitur est nunc, eget efficitur felis porttitor in.</p>
+                    </div>
+                </article>
+
             </div>
         </main>
-
-        <!-- RIGHT COLUMN: Bio & Info -->
-        <aside class="column col-right">
-            
-            <!-- Profile Section -->
-            <div class="info-section">
-                <span class="section-label">Profile (sample)</span>
-                <p style="font-size: 12px; line-height: 1.5;">
-                    Vivamus sed sapien fermentum, fermentum metus ut, efficitur nunc. Pellentesque sit amet ex sed est dapibus vestibulum. Donec ornare urna metus, ut mollis risus dignissim in. Phasellus tristique sed leo et dignissim. Nam lobortis vitae leo at finibus. Aliquam eget efficitur lacus.
-                </p>
-                <p style="font-size: 12px; line-height: 1.5;">
-                    Mauris leo erat, placerat quis semper eu, pulvinar in est. Nam eget justo quis ligula faucibus pretium ac nec mi. Aliquam lacus est, auctor sed arcu at, luctus condimentum lectus. Quisque vitae eleifend quam, vel suscipit nisl. Duis efficitur est nunc, eget efficitur felis porttitor in. Donec facilisis ultrices mattis. Quisque blandit ac enim non consectetur. Donec euismod magna turpis, ut blandit purus tempor sit amet. Suspendisse et hendrerit mi. Integer gravida, sapien quis ullamcorper auctor, metus eros aliquet ante, ut dictum ipsum tortor eget elit. Maecenas eu rutrum dui, ut faucibus lectus. Vivamus porttitor bibendum tortor.
-                </p>
-            </div>
-
-            <!-- Education Section -->
-            <div class="info-section">
-                <span class="section-label">Education</span>
-                <ul class="info-list">
-                    <li class="info-item">
-                        <span class="info-role">Vestibulum Euismod Ultrices (Congue)</span>
-                        <span class="info-detail">Suspendisse Aenean Lectus<br>2023</span>
-                    </li>
-                    <li class="info-item">
-                        <span class="info-role">Vestibulum Euismod Ultrices (Tincidunt)</span>
-                        <span class="info-detail">Aliquam Faucibus Tellus<br>(3 years)</span>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Employment Section -->
-            <div class="info-section">
-                <span class="section-label">Employment</span>
-                <ul class="info-list">
-                    <li class="info-item">
-                        <span class="info-role">Vestibulum Ultricies</span>
-                        <span class="info-detail">Suspendisse Aenean Vestibulum<br>2023 - 2024</span>
-                    </li>
-                    <li class="info-item">
-                        <span class="info-role">Pellentesque Habitant</span>
-                        <span class="info-detail">'Morbi Tristique Senectus'<br>Nunc Euismod Faucibus,<br>Porta Libero<br>2024</span>
-                    </li>
-                    <li class="info-item">
-                        <span class="info-role">Voluptat Ultricies</span>
-                        <span class="info-detail">Curabitur Fringilla Ornare,<br>Duis Quis<br>(since 2020)</span>
-                    </li>
-                    <li class="info-item">
-                        <span class="info-role">Accumsan Dui</span>
-                        <span class="info-detail">'Integer Consequat'<br>Purus Euismod Facilisis, Pharetra Massa<br>2022</span>
-                    </li>
-                    <li class="info-item">
-                        <span class="info-role">TEMPUS, TEMPUS, TEMPUS</span>
-                        <span class="info-detail">Aliquam Faucibus Tellus, Euismod Ornare<br>Tincidunt Quam<br>2021</span>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Referrals Section -->
-            <div class="info-section">
-                <span class="section-label">Referrals</span>
-                <ul class="info-list">
-                    <li class="info-item">
-                        <span class="info-role">Tincidunt Nibh</span>
-                        <span class="info-detail">Ultricies Vestibulum<br>Facilisis Ornare,<br>Porta Libero Universitas,<br>tincidunt.nibh@portolibero.edu.au<br>0491 570 006</span>
-                    </li>
-                    <li class="info-item">
-                        <span class="info-role">Dictumst Gravida</span>
-                        <span class="info-detail">Auctor Ligula / Founder<br>Aliquam Aliquam Congue, Felis<br>dictumst.gravida@gmail.com<br>0 491 570 457</span>
-                    </li>
-                </ul>
-            </div>
-
-        </aside>
 
     </div>
 
