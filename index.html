@@ -1,290 +1,773 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cargo Style Portfolio</title>
-    <style>
-        /* =========================================
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cargo Style Portfolio</title>
+<style>
+/* =========================================
            1. GLOBAL STYLES (The "Cargo" Aesthetic)
            ========================================= */
-        :root {
-            --bg-color: #111111;       /* Deep black/gray background */
-            --text-color: #ffffff;     /* White text */
-            --text-muted: #888888;     /* Gray text for metadata */
-            --accent-gray: #444444;    /* Gray for placeholder boxes */
-            --border-color: #ffffff;   /* White borders */
-            --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+:root {
+--bg-color: #111111;       /* Deep black/gray background */
+--text-color: #ffffff;     /* White text */
+--text-muted: #888888;     /* Gray text for metadata */
+--accent-gray: #444444;    /* Gray for placeholder boxes */
+--border-color: #ffffff;   /* White borders */
+--font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+--header-height: 80px;
         }
 
-        * {
-            box-sizing: border-box;
+
+* {
+box-sizing: border-box;
         }
 
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: var(--font-main);
-            font-size: 14px;
-            line-height: 1.4;
-            overflow: hidden; /* Hide body scroll, we scroll columns */
+
+body {
+margin: 0;
+padding: 0;
+background-color: var(--bg-color);
+color: var(--text-color);
+font-family: var(--font-main);
+font-size: 14px;
+line-height: 1.4;
+overflow-x: hidden;
         }
 
-        /* =========================================
-           2. LAYOUT (2 Independent Columns)
+
+/* =========================================
+           2. HEADER (New)
            ========================================= */
-        .layout-container {
-            display: grid;
-            grid-template-columns: 300px 1fr; /* Left Sidebar | Main Content */
-            height: 100vh; /* Full viewport height */
-            width: 100vw;
+.site-header {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: var(--header-height);
+background-color: var(--bg-color);
+border-bottom: 1px solid #222;
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 0 40px;
+z-index: 100;
         }
 
-        /* Common Column Styles */
-        .column {
-            padding: 40px;
-            overflow-y: auto; /* Independent scrolling */
-            scrollbar-width: thin; /* Firefox scrollbar styling */
-            scrollbar-color: #333 transparent;
+
+.header-left {
+display: flex;
+align-items: center;
+gap: 20px;
         }
 
-        /* Custom Scrollbar for Webkit (Chrome/Safari) */
-        .column::-webkit-scrollbar {
-            width: 6px;
-        }
-        .column::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 3px;
+
+.logo-placeholder {
+width: 40px;
+height: 40px;
+background-color: var(--accent-gray);
+border: 1px solid var(--border-color);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 10px;
+color: var(--text-muted);
         }
 
-        /* Left Column: Navigation & Thumbnails */
-        .col-left {
-            border-right: 1px solid #222;
-            padding: 40px 30px;
+
+.portfolio-title {
+font-size: 14px;
+font-weight: 500;
+text-transform: uppercase;
+letter-spacing: 1px;
         }
 
-        /* Right Column: Main Content */
-        .col-right {
-            padding: 40px 60px;
+
+.header-right {
+display: flex;
+gap: 20px;
         }
 
-        /* =========================================
-           3. LEFT COLUMN STYLES (The Gallery List)
+
+.social-link {
+color: var(--text-color);
+text-decoration: none;
+font-size: 12px;
+text-transform: uppercase;
+letter-spacing: 1px;
+transition: opacity 0.3s;
+        }
+
+
+.social-link:hover {
+opacity: 0.7;
+        }
+
+
+/* =========================================
+           3. LAYOUT (2 Independent Columns)
            ========================================= */
-        .project-list {
-            list-style: none;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 40px; /* Space between projects */
+.layout-container {
+display: grid;
+grid-template-columns: 1fr 500px; /* Left (Flex) | Right (Fixed Width) */
+height: 100vh;
+width: 100vw;
+padding-top: var(--header-height); /* Space for fixed header */
         }
 
-        .project-item {
-            cursor: default;
+
+/* Common Column Styles */
+.column {
+padding: 40px;
+overflow-y: auto; /* Independent scrolling */
+scrollbar-width: thin;
+scrollbar-color: #333 transparent;
         }
 
-        .project-title {
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+
+/* Custom Scrollbar */
+.column::-webkit-scrollbar {
+width: 6px;
+        }
+.column::-webkit-scrollbar-thumb {
+background: #333;
+border-radius: 3px;
         }
 
-        .project-date {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 15px;
-        }
 
-        /* The Thumbnail Image Style */
-        .project-thumb {
-            width: 100%;
-            height: 180px; /* Fixed height for thumbnails */
-            background-color: var(--accent-gray);
-            border: 1px solid var(--border-color);
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* The Diagonal Line Effect (Cargo Style) */
-        .project-thumb::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom right, transparent 49.5%, white 49.5%, white 50.5%, transparent 50.5%);
-            opacity: 0.3;
-        }
-
-        .thumb-label {
-            position: absolute;
-            bottom: 5px;
-            left: 5px;
-            font-size: 10px;
-            color: white;
-            opacity: 0.7;
-        }
-
-        /* =========================================
-           4. RIGHT COLUMN STYLES (Main Content)
+/* =========================================
+           4. LEFT COLUMN (Projects)
            ========================================= */
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            gap: 80px; /* Large gap between main projects */
+.col-left {
+border-right: 1px solid #222;
         }
 
-        /* The "Cargo" Large Placeholder Image */
-        .cargo-image-placeholder {
-            width: 100%;
-            height: 60vh; /* Large image */
-            background-color: var(--accent-gray);
-            border: 1px solid var(--border-color);
-            position: relative;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+
+.project-list {
+list-style: none;
+padding: 0;
+display: flex;
+flex-direction: column;
+gap: 80px;
         }
 
-        /* The Diagonal Line Effect for Large Images */
-        .cargo-image-placeholder::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom right, transparent 49.5%, white 49.5%, white 50.5%, transparent 50.5%);
-            opacity: 0.3;
+
+/* The Complex Project Block (Matches Screenshot) */
+.project-block {
+display: grid;
+/* 2 Columns: Text (Left) | Images (Right) */
+grid-template-columns: 300px 1fr; 
+gap: 40px;
+margin-bottom: 80px;
         }
 
-        /* Text Block */
-        .content-text {
-            max-width: 600px;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #ccc;
+
+/* Left Side: Text Content */
+.text-column {
+display: flex;
+flex-direction: column;
+gap: 20px;
         }
 
-        /* =========================================
-           5. RESPONSIVE (Mobile)
+
+.project-title {
+font-size: 16px;
+font-weight: 500;
+text-transform: uppercase;
+        }
+
+
+.project-date {
+font-size: 12px;
+color: var(--text-muted);
+        }
+
+
+.project-credits {
+font-size: 11px;
+color: var(--text-muted);
+line-height: 1.6;
+        }
+
+
+.project-description {
+font-size: 14px;
+line-height: 1.6;
+color: #ccc;
+        }
+
+
+/* Right Side: Images */
+.image-column {
+display: flex;
+flex-direction: column;
+gap: 20px;
+        }
+
+
+/* The "Cargo" Large Placeholder Image */
+.project-main-image {
+width: 100%;
+/* REMOVED: height: 50vh; */
+/* The container now scales to the image height */
+background-color: var(--accent-gray);
+border: 1px solid var(--border-color);
+position: relative;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+        }
+
+
+.image-label {
+position: absolute;
+bottom: 10px;
+left: 10px;
+font-size: 10px;
+color: white;
+opacity: 0.7;
+        }
+
+
+/* 3 Small Thumbnails (Aligned with Big Image) */
+.project-thumbnails {
+display: flex;
+gap: 10px;
+        }
+
+
+.thumb-box {
+/* REMOVED: height: 140px; */
+/* The container now scales to the thumbnail image height */
+width: 200px; /* Fixed width for thumbnails */
+background-color: var(--bg-color);
+border: 1px solid var(--border-color);
+position: relative;
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 5px;
+font-size: 10px;
+color: var(--text-muted);
+cursor: pointer;
+        }
+
+
+/* NEW: Image Scaling Rules */
+.project-main-image img {
+width: 100%;
+height: auto;
+display: block;
+        }
+
+.thumb-box img {
+width: 100%;
+height: auto;
+display: block;
+        }
+
+/* NEW: Video Scaling Rules */
+.thumb-box video {
+width: 100%;
+height: auto;
+display: block;
+        }
+
+
+/* =========================================
+           5. RIGHT COLUMN (Bio & Info)
            ========================================= */
-        @media (max-width: 900px) {
-            .layout-container {
-                grid-template-columns: 1fr; /* Stack columns */
-                height: auto;
-                overflow: visible;
+.col-right {
+padding: 40px 30px;
+        }
+
+
+.info-section {
+margin-bottom: 40px;
+        }
+
+
+.section-label {
+font-size: 12px;
+text-transform: uppercase;
+letter-spacing: 1px;
+margin-bottom: 15px;
+color: var(--text-muted);
+display: block;
+        }
+
+
+.info-list {
+list-style: none;
+padding: 0;
+        }
+
+
+.info-item {
+margin-bottom: 20px;
+padding-bottom: 20px;
+border-bottom: 1px solid #333;
+        }
+
+
+.info-item:last-child {
+border-bottom: none;
+        }
+
+
+.info-role {
+font-weight: 500;
+margin-bottom: 4px;
+display: block;
+        }
+
+
+.info-detail {
+font-size: 12px;
+color: var(--text-muted);
+display: block;
+        }
+
+
+/* =========================================
+           6. LIGHTBOX (New)
+           ========================================= */
+.lightbox {
+display: none; /* Hidden by default */
+position: fixed;
+z-index: 2000;
+left: 0;
+top: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.95);
+justify-content: center;
+align-items: center;
+opacity: 0;
+transition: opacity 0.3s ease;
+        }
+
+
+.lightbox.show {
+opacity: 1;
+        }
+
+
+.lightbox-content {
+max-width: 90%;
+max-height: 85vh;
+position: relative;
+        }
+
+
+.lightbox-img {
+max-width: 100%;
+max-height: 85vh;
+border: 1px solid #333;
+box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+/* NEW: Lightbox Video Styles */
+.lightbox-video {
+max-width: 90%;
+max-height: 85vh;
+justify-content: center;
+align-items: center;
+border: 1px solid #333;
+box-shadow: 0 0 20px rgba(0,0,0,0.5);
+display: none; /* Hidden by default */
+        }
+
+
+.close-btn {
+position: absolute;
+top: 20px;
+right: 30px;
+color: #fff;
+font-size: 40px;
+font-weight: bold;
+cursor: pointer;
+z-index: 2001;
+        }
+
+
+.prev, .next {
+cursor: pointer;
+position: absolute;
+top: 50%;
+width: auto;
+padding: 16px;
+margin-top: -50px;
+color: white;
+font-weight: bold;
+font-size: 24px;
+transition: 0.3s;
+user-select: none;
+        }
+
+
+.prev { left: 20px; }
+.next { right: 20px; }
+
+
+.prev:hover, .next:hover {
+color: #aaa;
+        }
+
+
+/* =========================================
+           7. RESPONSIVE (Mobile)
+           ========================================= */
+@media (max-width: 900px) {
+.layout-container {
+grid-template-columns: 1fr; /* Stack columns */
+height: auto;
+overflow: visible;
             }
-            .column {
-                height: auto;
-                overflow: visible;
-                border: none;
+.column {
+height: auto;
+overflow: visible;
+border: none;
             }
-            .cargo-image-placeholder {
-                height: 40vh;
-            }
-            .project-thumb {
-                height: 120px;
+.project-block {
+grid-template-columns: 1fr; /* Stack text and images */
             }
         }
-    </style>
+</style>
 </head>
 <body>
 
-    <div class="layout-container">
-        
-        <!-- LEFT COLUMN: Scrollable List of Titles + Thumbnails -->
-        <aside class="column col-left">
-            <ul class="project-list">
-                
-                <!-- Project 1 -->
-                <li class="project-item">
-                    <div class="project-title">Project 03</div>
-                    <div class="project-date">August 24 2042</div>
-                    <!-- EDIT: Replace this div with <img src="your-image.jpg" class="project-thumb"> -->
-                    <div class="project-thumb">
-                        <span class="thumb-label">Cargo® Placeholder</span>
-                    </div>
-                </li>
 
-                <!-- Project 2 -->
-                <li class="project-item">
-                    <div class="project-title">Project 02</div>
-                    <div class="project-date">August 24 2042</div>
-                    <!-- EDIT: Replace this div with <img src="your-image.jpg" class="project-thumb"> -->
-                    <div class="project-thumb">
-                        <span class="thumb-label">Cargo® Placeholder</span>
-                    </div>
-                </li>
+<!-- NEW HEADER -->
+<header class="site-header">
+<div class="header-left">
+<!-- Logo Placeholder -->
+<div class="logo-placeholder">LOGO</div>
+<!-- Portfolio Title -->
+<div class="portfolio-title">My Portfolio</div>
+</div>
+<div class="header-right">
+<!-- Email Link -->
+<a href="mailto:your@email.com" class="social-link">Email</a>
+<!-- Instagram Link -->
+<a href="https://instagram.com/yourusername" class="social-link" target="_blank">Instagram</a>
+</div>
+</header>
 
-                <!-- Project 3 -->
-                <li class="project-item">
-                    <div class="project-title">Project 01</div>
-                    <div class="project-date">August 24 2042</div>
-                    <!-- EDIT: Replace this div with <img src="your-image.jpg" class="project-thumb"> -->
-                    <div class="project-thumb">
-                        <span class="thumb-label">Cargo® Placeholder</span>
-                    </div>
-                </li>
 
-            </ul>
-        </aside>
+<!-- LIGHTBOX STRUCTURE -->
+<div id="lightbox" class="lightbox">
+<span class="close-btn">&times;</span>
+<a class="prev">&#10094;</a>
+<a class="next">&#10095;</a>
+<div class="lightbox-content">
+<img class="lightbox-img" src="" alt="">
+<!-- NEW: Video Element for Lightbox -->
+<video class="lightbox-video" src="" controls></video>
+</div>
+</div>
 
-        <!-- RIGHT COLUMN: Scrollable Main Content (Large Images + Text) -->
-        <main class="column col-right">
-            <div class="main-content">
-                
-                <!-- Main Project 1 -->
-                <article>
-                    <!-- EDIT: Replace this div with <img src="your-image.jpg" class="cargo-image-placeholder"> -->
-                    <div class="cargo-image-placeholder">
-                        <span class="thumb-label">Cargo® Placeholder Image · cargo.site</span>
-                    </div>
-                    
-                    <div class="content-text">
-                        <!-- EDIT TEXT HERE -->
-                        <p>[...] Vestibulum et dignissim magna. Nullam at ultrices felis. Suspendisse facilisis sagittis sem sit amet tempor. Nam sit amet nibh et enim laoreet porta sit amet vel purus. Maecenas augue velit, feugiat in maximus id, auctor vel ex. Integer placerat lectus mi, vel molestie neque dictum at. Vivamus sed sapien: fermentum, fermentum, metus ut, efficitur nunc. Pellentesque sit amet ex sed est dapibus vestibulum.</p>
-                    </div>
-                </article>
 
-                <!-- Main Project 2 -->
-                <article>
-                    <!-- EDIT: Replace this div with <img src="your-image.jpg" class="cargo-image-placeholder"> -->
-                    <div class="cargo-image-placeholder">
-                        <span class="thumb-label">Cargo® Placeholder Image · cargo.site</span>
-                    </div>
-                    
-                    <div class="content-text">
-                        <!-- EDIT TEXT HERE -->
-                        <p>Vivamus sed sapien fermentum, fermentum metus ut, efficitur nunc. Pellentesque sit amet ex sed est dapibus vestibulum. Donec ornare urna metus, ut mollis risus dignissim in. Phasellus tristique sed leo et dignissim. Nam lobortis vitae leo at finibus. Aliquam eget efficitur lacus.</p>
-                    </div>
-                </article>
+<div class="layout-container">
+<!-- LEFT COLUMN: Projects List -->
+<aside class="column col-left">
+<ul class="project-list">
+<!-- Project 1 (Complex Layout) -->
+<li class="project-block">
+<!-- LEFT SIDE: Text Content -->
+<div class="text-column">
+<div class="project-header">
+<div class="project-title">E.V.I. (Experimental Video Interface)</div>
+<div class="project-date">June 16, 2026</div>
+</div>
+<div class="project-credits">
+<p>Tags: Intervention, Experimental, Hardware</p>
+<p>As part of Studio Digital Native, Design Academy Eindhoven</p>
+<p>Featured in the exhibition "Death of the Music Video(?)"</p>
+</div>
 
-                <!-- Main Project 3 -->
-                <article>
-                    <!-- EDIT: Replace this div with <img src="your-image.jpg" class="cargo-image-placeholder"> -->
-                    <div class="cargo-image-placeholder">
-                        <span class="thumb-label">Cargo® Placeholder Image · cargo.site</span>
-                    </div>
-                    
-                    <div class="content-text">
-                        <!-- EDIT TEXT HERE -->
-                        <p>Mauris leo erat, placerat quis semper eu, pulvinar in est. Nam eget justo quis ligula faucibus pretium ac nec mi. Aliquam lacus est, auctor sed arcu at, luctus condimentum lectus. Quisque vitae eleifend quam, vel suscipit nisl. Duis efficitur est nunc, eget efficitur felis porttitor in.</p>
-                    </div>
-                </article>
 
-            </div>
-        </main>
+<div class="project-description">
+<p>[...] Experimental Video Interface takes the position of an intervention in the music video industry. The interface consists out of multiple components chained together in a modular setup. These are made to explore the ambiguity of electrical signals used to transfer sound and image. It takes inspiration from dub music, which uses a mixing board like an instrument and revolves around reworking existing music. It is made to bring the personality and emotions of music to a frictionless video editing industry. All components and research are open-sourced through the website found here.</p>
+</div>
+</div>
 
-    </div>
+
+<!-- RIGHT SIDE: Images -->
+<div class="image-column">
+<!-- Big Image -->
+<div class="project-main-image">
+<!-- IMPORTANT: The img tag now controls the height of this box -->
+<img src="evi-installation-horizontal.tif" alt="Installation">
+</div>
+
+
+<!-- 3 Small Thumbnails (Aligned with Big Image) -->
+<div class="project-thumbnails">
+<!-- IMPORTANT: Added img tags to thumbnails so they also scale -->
+<div class="thumb-box">
+<img src="evi-components.tif" alt="Thumb 3.1">
+</div>
+<!-- NEW: Video Thumbnail -->
+<div class="thumb-box">
+    <video src="evi-performance.mp4" poster="evi-performance-thumbnail.png" muted loop playsinline controls></video>
+</div>
+<div class="thumb-box">
+    <video src="evi-example-video.mp4" poster="evi-example-thumbnail.png" muted loop playsinline controls></video>
+</div>
+</div>
+</div>
+
+
+</li>
+
+
+<!-- Project 2 (Duplicate this block for more projects) -->
+<li class="project-block">
+<div class="text-column">
+<div class="project-header">
+<div class="project-title">Project 02</div>
+<div class="project-date">August 24 2042</div>
+</div>
+<div class="project-credits">
+<p>Authors: Zeus Tutu & Tito Penrose</p>
+<p>Edited by: Dusty Acres & Mitch Glitch</p>
+<p>92pp, Hardback, 24 x 32 cm</p>
+<p>ISBN: 978-82-697000-0-0</p>
+<p>Printed by: Cargo® Press Ltd</p>
+</div>
+
+
+<div class="project-description">
+<p>Vivamus sed sapien fermentum, fermentum metus ut, efficitur nunc. Pellentesque sit amet ex sed est dapibus vestibulum. Donec ornare urna metus, ut mollis risus dignissim in. Phasellus tristique sed leo et dignissim. Nam lobortis vitae leo at finibus. Aliquam eget efficitur lacus.</p>
+</div>
+</div>
+
+
+<div class="image-column">
+<div class="project-main-image">
+<span class="image-label">Cargo® Placeholder Image · cargo.site</span>
+<!-- IMPORTANT: Replace the span above with: <img src="your-image.jpg" alt="Project 2"> -->
+</div>
+
+
+<div class="project-thumbnails">
+<div class="thumb-box">Cargo®<br>3.1</div>
+<div class="thumb-box">Cargo®<br>3.2</div>
+<div class="thumb-box">Cargo®<br>3.3</div>
+<!-- IMPORTANT: Replace these divs with: <img src="your-thumb.jpg" alt="Thumb 3.1"> etc. -->
+</div>
+</div>
+</li>
+
+
+</ul>
+</aside>
+
+
+<!-- RIGHT COLUMN: Bio & Info -->
+<aside class="column col-right">
+<!-- Profile Section -->
+<div class="info-section">
+<span class="section-label">Profile (sample)</span>
+<p style="font-size: 12px; line-height: 1.5;">
+                    Vivamus sed sapien fermentum, fermentum metus ut, efficitur nunc. Pellentesque sit amet ex sed est dapibus vestibulum. Donec ornare urna metus, ut mollis risus dignissim in. Phasellus tristique sed leo et dignissim. Nam lobortis vitae leo at finibus. Aliquam eget efficitur lacus.
+</p>
+<p style="font-size: 12px; line-height: 1.5;">
+                    Mauris leo erat, placerat quis semper eu, pulvinar in est. Nam eget justo quis ligula faucibus pretium ac nec mi. Aliquam lacus est, auctor sed arcu at, luctus condimentum lectus. Quisque vitae eleifend quam, vel suscipit nisl. Duis efficitur est nunc, eget efficitur felis porttitor in. Donec facilisis ultrices mattis. Quisque blandit ac enim non consectetur. Donec euismod magna turpis, ut blandit purus tempor sit amet. Suspendisse et hendrerit mi. Integer gravida, sapien quis ullamcorper auctor, metus eros aliquet ante, ut dictum ipsum tortor eget elit. Maecenas eu rutrum dui, ut faucibus lectus. Vivamus porttitor bibendum tortor.
+</p>
+</div>
+
+
+<!-- Education Section -->
+<div class="info-section">
+<span class="section-label">Education</span>
+<ul class="info-list">
+<li class="info-item">
+<span class="info-role">Vestibulum Euismod Ultrices (Congue)</span>
+<span class="info-detail">Suspendisse Aenean Lectus<br>2023</span>
+</li>
+<li class="info-item">
+<span class="info-role">Vestibulum Euismod Ultrices (Tincidunt)</span>
+<span class="info-detail">Aliquam Faucibus Tellus<br>(3 years)</span>
+</li>
+</ul>
+</div>
+
+
+<!-- Employment Section -->
+<div class="info-section">
+<span class="section-label">Employment</span>
+<ul class="info-list">
+<li class="info-item">
+<span class="info-role">Vestibulum Ultricies</span>
+<span class="info-detail">Suspendisse Aenean Vestibulum<br>2023 - 2024</span>
+</li>
+<li class="info-item">
+<span class="info-role">Pellentesque Habitant</span>
+<span class="info-detail">'Morbi Tristique Senectus'<br>Nunc Euismod Faucibus,<br>Porta Libero<br>2024</span>
+</li>
+<li class="info-item">
+<span class="info-role">Voluptat Ultricies</span>
+<span class="info-detail">Curabitur Fringilla Ornare,<br>Duis Quis<br>(since 2020)</span>
+</li>
+<li class="info-item">
+<span class="info-role">Accumsan Dui</span>
+<span class="info-detail">'Integer Consequat'<br>Purus Euismod Facilisis, Pharetra Massa<br>2022</span>
+</li>
+<li class="info-item">
+<span class="info-role">TEMPUS, TEMPUS, TEMPUS</span>
+<span class="info-detail">Aliquam Faucibus Tellus, Euismod Ornare<br>Tincidunt Quam<br>2021</span>
+</li>
+</ul>
+</div>
+
+
+<!-- Referrals Section -->
+<div class="info-section">
+<span class="section-label">Referrals</span>
+<ul class="info-list">
+<li class="info-item">
+<span class="info-role">Tincidunt Nibh</span>
+<span class="info-detail">Ultricies Vestibulum<br>Facilisis Ornare,<br>Porta Libero Universitas,<br>tincidunt.nibh@portolibero.edu.au<br>0491 570 006</span>
+</li>
+<li class="info-item">
+<span class="info-role">Dictumst Gravida</span>
+<span class="info-detail">Auctor Ligula / Founder<br>Aliquam Aliquam Congue, Felis<br>dictumst.gravida@gmail.com<br>0 491 570 457</span>
+</li>
+</ul>
+</div>
+
+
+</aside>
+
+
+</div>
+
+
+<!-- JAVASCRIPT FOR LIGHTBOX -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.querySelector('.lightbox-img');
+const lightboxVideo = document.querySelector('.lightbox-video');
+const closeBtn = document.querySelector('.close-btn');
+const prevBtn = document.querySelector('.prev');
+const nextBtn = document.querySelector('.next');
+
+
+let currentIndex = 0;
+let currentProjectImages = [];
+
+
+// Function to open lightbox
+function openLightbox(index) {
+currentIndex = index;
+updateLightboxContent();
+lightbox.style.display = 'flex';
+// Small delay to allow display:flex to apply before opacity transition
+setTimeout(() => {
+lightbox.classList.add('show');
+                }, 10);
+            }
+
+
+// Function to close lightbox
+function closeLightbox() {
+lightbox.classList.remove('show');
+setTimeout(() => {
+lightbox.style.display = 'none';
+                }, 300); // Wait for transition
+            }
+
+
+// Function to update the content in the lightbox (Image or Video)
+function updateLightboxContent() {
+const container = currentProjectImages[currentIndex];
+const img = container.querySelector('img');
+const video = container.querySelector('video');
+
+
+if (video) {
+// If it's a video
+lightboxImg.style.display = 'none';
+lightboxVideo.style.display = 'block';
+lightboxVideo.src = video.src;
+lightboxVideo.poster = video.poster;
+lightboxVideo.play();
+                } else if (img) {
+// If it's an image
+lightboxVideo.style.display = 'none';
+lightboxVideo.pause();
+lightboxImg.style.display = 'block';
+lightboxImg.src = img.src;
+                } else {
+// Fallback if no media is found
+lightboxImg.style.display = 'none';
+lightboxVideo.style.display = 'none';
+                }
+            }
+
+
+// Event Listeners for Navigation
+closeBtn.onclick = closeLightbox;
+// Close when clicking outside the media
+lightbox.onclick = (e) => {
+if (e.target === lightbox || e.target.classList.contains('lightbox-content')) {
+closeLightbox();
+                }
+            };
+
+
+prevBtn.onclick = (e) => {
+e.stopPropagation(); // Prevent closing
+currentIndex = (currentIndex - 1 + currentProjectImages.length) % currentProjectImages.length;
+updateLightboxContent();
+            };
+
+
+nextBtn.onclick = (e) => {
+e.stopPropagation(); // Prevent closing
+currentIndex = (currentIndex + 1) % currentProjectImages.length;
+updateLightboxContent();
+            };
+
+
+// Keyboard Navigation
+document.addEventListener('keydown', (e) => {
+if (lightbox.style.display === 'flex') {
+if (e.key === 'Escape') closeLightbox();
+if (e.key === 'ArrowLeft') prevBtn.click();
+if (e.key === 'ArrowRight') nextBtn.click();
+                }
+            });
+
+
+// Main Logic: Attach click events to project images/videos
+const projectBlocks = document.querySelectorAll('.project-block');
+
+
+projectBlocks.forEach(block => {
+// Get all image/video containers within this block
+const mediaContainers = block.querySelectorAll('.project-main-image, .thumb-box');
+mediaContainers.forEach((container, index) => {
+// Check if there is an img or video tag inside
+const img = container.querySelector('img');
+const video = container.querySelector('video');
+
+
+if (img || video) {
+container.onclick = () => {
+currentProjectImages = Array.from(mediaContainers); // Store list for this project
+openLightbox(index);
+                        };
+                    }
+                });
+            });
+        });
+</script>
+
 
 </body>
 </html>
