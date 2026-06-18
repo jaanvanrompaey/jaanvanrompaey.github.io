@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connecting Heritage</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#f4f3ef;--panel:#ffffff;--border:#d6d3cc;--text:#1a1a1a;
+    --muted:#9a968f;--accent:#5b5a49;--accent-dim:#919082;
+    --dim-line:#b8b5ae;--fill-light:#ffffff;--leg-color:#4a4a4a;
+    --seat-fill:#e8e8e4;
+  }
+  html,body{height:100%;overflow:hidden;font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text)}
+
+  .app{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;height:100vh;gap:1px;background:var(--border)}
+
+  .quarter{background:var(--panel);display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+  .quarter .q-title{
+    padding:12px 18px 8px;font-size:9px;text-transform:uppercase;
+    letter-spacing:2px;color:var(--muted);font-weight:700;
+    border-bottom:1px solid var(--border);flex-shrink:0;
+  }
+  .quarter .q-content{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  
+  /* Key change: Removed max-width and max-height constraints.
+     The SVG will now scale to fill the container exactly, allowing the bench to grow wider. */
+  .quarter .q-content svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .sidebar-quarter{padding:28px 26px;overflow-y:auto;display:flex;flex-direction:column;gap:28px}
+  .sidebar-quarter::-webkit-scrollbar{width:4px}
+  .sidebar-quarter::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+  .brand{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--muted);font-weight:700;margin-bottom:2px}
+  .brand .name{display:block;font-size:20px;color:var(--text);letter-spacing:-.5px;text-transform:none;margin-top:2px;font-weight:300}
+
+  .sec{font-size:9px;text-transform:uppercase;letter-spacing:1.8px;color:var(--muted);font-weight:700;margin-bottom:10px}
+
+  .width-row{display:flex;align-items:baseline;gap:4px;margin-bottom:8px}
+  .width-row .num{font-size:38px;font-weight:200;color:var(--text);letter-spacing:-2px;line-height:1}
+  .width-row .unit{font-size:13px;color:var(--muted);font-weight:500}
+
+  .slider-wrap{position:relative;width:100%;height:32px;display:flex;align-items:center;margin-bottom:4px}
+  .slider-wrap input[type=range]{
+    -webkit-appearance:none;width:100%;height:2px;background:var(--border);outline:none;
+  }
+  .slider-wrap input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+    background:var(--accent);cursor:pointer;box-shadow:0 1px 5px rgba(74,103,65,.25);
+  }
+  .slider-limits{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-weight:500;letter-spacing:.5px}
+
+  .divider{height:1px;background:var(--border);margin:0}
+
+  .sum-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
+  .sum-row .lbl{color:var(--muted)}
+  .sum-row .val{font-weight:600;font-variant-numeric:tabular-nums}
+  .sum-total{display:flex;justify-content:space-between;font-size:15px;font-weight:600;
+    padding-top:8px;border-top:1px solid var(--border);margin-top:4px}
+
+  /* ── Plan drawing styles ── */
+  .plan-body{fill:none;stroke:var(--text);stroke-width:.7;shape-rendering:geometricPrecision}
+  .plan-body-solid{fill:var(--fill-light);stroke:var(--text);stroke-width:.7;shape-rendering:geometricPrecision}
+  .plan-sup{stroke:var(--accent-dim);stroke-width:.7;stroke-dasharray:4,3;shape-rendering:geometricPrecision}
+  .plan-dim{stroke:var(--dim-line);stroke-width:.35;shape-rendering:geometricPrecision}
+  .plan-dim-tick{stroke:var(--dim-line);stroke-width:.35;shape-rendering:geometricPrecision}
+  .plan-dim-text{font-size:8.5px;fill:var(--dim-line);font-family:'Helvetica Neue',sans-serif;font-weight:500;letter-spacing:.4px}
+  .plan-label{font-size:7.5px;fill:var(--muted);font-family:'Helvetica Neue',sans-serif;font-weight:600;letter-spacing:1.8px}
+  .plan-center{stroke:var(--accent-dim);stroke-width:.25;stroke-dasharray:8,4,2,4;shape-rendering:geometricPrecision}
+  .plan-section-line{stroke:var(--accent);stroke-width:.4;stroke-dasharray:2,2;shape-rendering:geometricPrecision}
+  .plan-corner{fill:none;stroke:var(--muted);stroke-width:.3;shape-rendering:geometricPrecision}
+  .plan-fill-sup{fill:var(--accent);stroke:none;shape-rendering:geometricPrecision}
+  .plan-leg-brace{stroke:var(--leg-color);stroke-width:.4;shape-rendering:geometricPrecision}
+  .plan-leg-cap{fill:#e0e0dc;stroke:var(--text);stroke-width:.5;shape-rendering:geometricPrecision}
+  .plan-seat{fill:var(--seat-fill);stroke:var(--text);stroke-width:.8;shape-rendering:geometricPrecision}
+  .plan-wood-grain{stroke:#d0d0cc;stroke-width:.3;shape-rendering:geometricPrecision;fill:none}
+
+  @media(max-width:700px){
+    .app{grid-template-columns:1fr;grid-template-rows:1fr 1fr 1fr 1fr}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Top-Left: Controls -->
+  <div class="quarter sidebar-quarter">
+    <div class="brand"><span class="name" style="font-size:50px ;">Connecting Heritage</span>Bench Configurator</div>
+
+    <div>
+      <div class="sec">Width</div>
+      <div class="width-row">
+        <span class="num" id="widthNum">100</span>
+        <span class="unit">cm</span>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" id="widthSlider" min="50" max="400" step="10" value="100">
+      </div>
+      <div class="slider-limits"><span>50 cm</span><span>400 cm</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div class="sec">Dimensions</div>
+      <div class="sum-row"><span class="lbl">Length</span><span class="val" id="sW">100 cm</span></div>
+      <div class="sum-row"><span class="lbl">Depth</span><span class="val" id="sD">40 cm</span></div>
+      <div class="sum-row"><span class="lbl">Height</span><span class="val" id="sH">45 cm</span></div>
+      <div class="sum-row"><span class="lbl">Seats</span><span class="val" id="sS">1</span></div>
+      <div class="sum-total"><span>Total</span><span id="sT">100 cm</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div class="sec">Spacing</div>
+      <div class="sum-row"><span class="lbl">Support Spacing</span><span class="val" id="sB">50 cm</span></div>
+      <div class="sum-row"><span class="lbl">Supports</span><span class="val" id="sN">1</span></div>
+    </div>
+  </div>
+
+  <!-- Top-Right: Top Plan -->
+  <div class="quarter" id="qTop">
+    <div class="q-title">Top Plan</div>
+    <div class="q-content" id="svgTop"></div>
+  </div>
+
+  <!-- Bottom-Left: Side Elevation (Swapped) -->
+  <div class="quarter" id="qFront">
+    <div class="q-title">Side Elevation</div>
+    <div class="q-content" id="svgFront"></div>
+  </div>
+
+  <!-- Bottom-Right: Front Elevation (Swapped) -->
+  <div class="quarter" id="qSide">
+    <div class="q-title">Front Elevation</div>
+    <div class="q-content" id="svgSide"></div>
+  </div>
+
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+
+const benchDepth = 40;
+const benchHeight = 45;
+const seatThickness = 10;
+const legCapH = 10;
+const braceHeight = benchHeight - seatThickness - legCapH * 2; // 19cm
+
+// New constants for armrests
+const armrestHeight = 10; // cm - height of the block itself
+const armrestGap = 10; // cm - gap between seat and block
+const armrestWidthFront = 10; // cm
+
+let state = { width: 100 };
+
+function nSup(w) {
+  return Math.max(0, Math.floor(w / 50) - 1);
+}
+
+function bayW(w) {
+  const n = nSup(w);
+  return n > 0 ? w / (n + 1) : w;
+}
+
+function E(tag, a) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(a || {})) e.setAttribute(k, v);
+  return e;
+}
+
+
+
+// Draw X-bracing for legs (spans full block height)
+function drawLegBracing(svg, x, y, w, h) {
+  svg.appendChild(E('line', { x1: x, y1: y, x2: x + w, y2: y + h, class: 'plan-leg-brace' }));
+  svg.appendChild(E('line', { x1: x + w, y1: y, x2: x, y2: y + h, class: 'plan-leg-brace' }));
+  const midX = x + w / 2;
+  svg.appendChild(E('line', { x1: x + w * 0.25, y1: y, x2: x + w * 0.75, y2: y + h, class: 'plan-leg-brace' }));
+  svg.appendChild(E('line', { x1: x + w * 0.75, y1: y, x2: x + w * 0.25, y2: y + h, class: 'plan-leg-brace' }));
+}
+
+// Draw top view with wood grain texture
+function drawWoodGrain(svg, x, y, w, h, s) {
+  for (let i = 0; i < 12; i++) {
+    const gy = y + (h / 12) * i + h / 24;
+    svg.appendChild(E('path', {
+      d: `M${x} ${gy} Q${x + w * 0.3} ${gy - 1}, ${x + w * 0.5} ${gy + 1} Q${x + w * 0.7} ${gy + 2}, ${x + w} ${gy}`,
+      class: 'plan-wood-grain'
+    }));
+  }
+}
+
+// ─── TOP VIEW ───
+function drawTop() {
+  const svg = E('svg', { xmlns: NS, 'shape-rendering': 'geometricPrecision' });
+  
+  const totalH = benchHeight + armrestGap + armrestHeight;
+  const maxDim = Math.max(state.width, benchDepth, totalH);
+  
+  // FIX: Use a fixed scale factor s=50 for consistent sizing across views.
+  const s = 50;
+  
+  // Calculate bench dimensions in SVG units
+  const bw = state.width * s;
+  const bd = benchDepth * s;
+  const totalH_px = totalH * s;
+  
+  // Add padding to ensure the bench is centered and doesn't clip
+  const padX = 2000; // 40 units horizontal padding
+  const padY = 2000; // 40 units vertical padding
+  
+  // Calculate viewBox dimensions
+  const vw = bw + padX * 2;
+  const vh = bd + padY * 2; // Top view is based on depth
+  
+  svg.setAttribute('viewBox', `0 0 ${vw} ${vh}`);
+  svg.appendChild(E('rect', { x: 0, y: 0, width: vw, height: vh, fill: '#ffffff' }));
+
+  // Center the bench
+  const cx = (vw - bw) / 2;
+  const cy = (vh - bd) / 2;
+
+  svg.appendChild(E('rect', { x: cx, y: cy, width: bw, height: bd, class: 'plan-seat' }));
+  drawWoodGrain(svg, cx, cy, bw, bd, s);
+
+  const n = nSup(state.width);
+  const bayPx = bw / (n + 1);
+  
+  const capSize = 12 * s;
+  const legPositions = [cx, cx + bw - capSize];
+  
+  for (let i = 0; i < n; i++) {
+    legPositions.push(cx + bayPx * (i + 1) - capSize / 2);
+  }
+  
+  legPositions.forEach(lx => {
+    svg.appendChild(E('rect', { 
+      x: lx, y: cy, width: capSize, height: bd, 
+      class: 'plan-leg-cap' 
+    }));
+  });
+
+  for (let i = 0; i < n; i++) {
+    const px = cx + bayPx * (i + 1);
+    svg.appendChild(E('line', { x1: px, y1: cy, x2: px, y2: cy + bd, class: 'plan-sup' }));
+    svg.appendChild(E('circle', { cx: px, cy: cy, r: 2.5, class: 'plan-fill-sup' }));
+    svg.appendChild(E('circle', { cx: px, cy: cy + bd, r: 2.5, class: 'plan-fill-sup' }));
+  }
+
+  [[cx, cy], [cx + bw, cy], [cx, cy + bd], [cx + bw, cy + bd]].forEach(([x, y]) => {
+    svg.appendChild(E('circle', { cx: x, cy: y, r: 1.2, class: 'plan-corner' }));
+  });
+
+  svg.appendChild(E('line', { x1: cx, y1: cy + bd + 10, x2: cx + bw, y2: cy + bd + 10, class: 'plan-section-line' }));
+
+  const lbl = E('text', { x: vw - 12, y: vh - 12, class: 'plan-label', 'text-anchor': 'end' });
+  lbl.textContent = 'TOP PLAN';
+  svg.appendChild(lbl);
+
+  return svg;
+}
+
+// ─── FRONT VIEW ───
+function drawFront() {
+  const svg = E('svg', { xmlns: NS, 'shape-rendering': 'geometricPrecision' });
+  
+  const totalH = benchHeight + armrestGap + armrestHeight;
+  const maxDim = Math.max(state.width, benchDepth, totalH);
+  
+  // FIX: Use the same fixed scale factor s=50.
+  const s = 50;
+  
+  // Calculate bench dimensions in SVG units
+  const bw = state.width * s;
+  const bd = benchDepth * s;
+  const totalH_px = totalH * s;
+  const seatH = seatThickness * s;
+  const legH = (benchHeight - seatThickness - legCapH) * s;
+  const capH = legCapH * s;
+  
+  // Add padding to ensure the bench is centered and doesn't clip
+  const padX = 2000; // 40 units horizontal padding
+  const padY = 2000; // 40 units vertical padding
+  
+  // Calculate viewBox dimensions
+  // Front view width is same as Top view width
+  const vw = bw + padX * 2;
+  // Front view height is based on total height
+  const vh = totalH_px + padY * 2;
+  
+  svg.setAttribute('viewBox', `0 0 ${vw} ${vh}`);
+  svg.appendChild(E('rect', { x: 0, y: 0, width: vw, height: vh, fill: '#ffffff' }));
+
+  // Center the bench
+  const cx = (vw - bw) / 2;
+  const cy = (vh - totalH_px) / 2;
+
+  svg.appendChild(E('rect', { x: cx, y: cy, width: bw, height: seatH, class: 'plan-seat' }));
+
+  const n = nSup(state.width);
+  const bayPx = bw / (n + 1);
+  
+  const legWidth = 10 * s;
+  const legPositions = [cx, cx + bw - legWidth];
+  
+  for (let i = 0; i < n; i++) {
+    legPositions.push(cx + bayPx * (i + 1) - legWidth / 2);
+  }
+
+  legPositions.forEach(lx => {
+    drawLegBracing(svg, lx, cy + seatH, legWidth, legH);
+    svg.appendChild(E('rect', { 
+      x: lx, y: cy + seatH + legH, width: legWidth, height: capH, 
+      class: 'plan-leg-cap' 
+    }));
+  });
+
+  const armrestW = armrestWidthFront * s;
+  const armrestH_px = armrestHeight * s;
+  const armrestGapPx = armrestGap * s;
+  
+  const lx_left = cx;
+  const lx_right = cx + bw - armrestW;
+  const armrestY = cy - armrestGapPx * 2;
+  
+  svg.appendChild(E('rect', { 
+    x: lx_left, y: armrestY, width: armrestW, height: armrestH_px, 
+    class: 'plan-leg-cap' 
+  }));
+  drawLegBracing(svg, lx_left, cy, armrestW, -armrestGapPx);
+
+  svg.appendChild(E('rect', { 
+    x: lx_right, y: armrestY, width: armrestW, height: armrestH_px, 
+    class: 'plan-leg-cap' 
+  }));
+  drawLegBracing(svg, lx_right, cy, armrestW, -armrestGapPx);
+
+  const objectTopY = armrestY;
+  const objectBottomY = cy + seatH + legH + capH;
+  
+
+
+  const lbl = E('text', { x: vw - 12, y: vh - 12, class: 'plan-label', 'text-anchor': 'end' });
+  lbl.textContent = 'FRONT ELEVATION';
+  svg.appendChild(lbl);
+
+  return svg;
+}
+
+// ─── SIDE VIEW ───
+function drawSide() {
+  const svg = E('svg', { xmlns: NS, 'shape-rendering': 'geometricPrecision' });
+  
+  const totalH = benchHeight + armrestGap + armrestHeight;
+  const maxDim = Math.max(state.width, benchDepth, totalH);
+  
+  // FIX: Use the same fixed scale factor s=50.
+  const s = 50;
+  
+  // Calculate bench dimensions in SVG units
+  const bw = state.width * s;
+  const bd = benchDepth * s;
+  const totalH_px = totalH * s;
+  const seatH = seatThickness * s;
+  const legH = (benchHeight - seatThickness - legCapH) * s;
+  const capH = legCapH * s;
+  
+  // Add padding to ensure the bench is centered and doesn't clip
+  const padX = 2000; // 40 units horizontal padding
+  const padY = 2000; // 40 units vertical padding
+  
+  // Calculate viewBox dimensions
+  // Side view width is based on depth
+  const vw = bd + padX * 2;
+  // Side view height is based on total height
+  const vh = totalH_px + padY * 2;
+  
+  svg.setAttribute('viewBox', `0 0 ${vw} ${vh}`);
+  svg.appendChild(E('rect', { x: 0, y: 0, width: vw, height: vh, fill: '#ffffff' }));
+
+  // Center the bench
+  const bx = (vw - bd) / 2;
+  const cy = (vh - totalH_px) / 2;
+
+  svg.appendChild(E('rect', { x: bx, y: cy, width: bd, height: seatH, class: 'plan-seat' }));
+
+  drawLegBracing(svg, bx, cy + seatH, bd, legH);
+  
+  svg.appendChild(E('rect', { 
+    x: bx, y: cy + seatH + legH, width: bd, height: capH, 
+    class: 'plan-leg-cap' 
+  }));
+
+  const armrestH_px = armrestHeight * s;
+  const armrestGapPx = armrestGap * s;
+  const armrestY = cy - armrestGapPx * 2;
+  
+  svg.appendChild(E('rect', { 
+    x: bx, y: armrestY, width: bd, height: armrestH_px, 
+    class: 'plan-leg-cap' 
+  }));
+  drawLegBracing(svg, bx, cy, bd, -armrestGapPx);
+
+  const objectTopY = armrestY;
+  const objectBottomY = cy + seatH + legH + capH;
+
+
+  const lbl = E('text', { x: vw - 12, y: vh - 12, class: 'plan-label', 'text-anchor': 'end' });
+  lbl.textContent = 'SIDE ELEVATION';
+  svg.appendChild(lbl);
+
+  return svg;
+}
+
+// ─── Update ───
+function update() {
+  try {
+    const w = state.width;
+    const n = nSup(w);
+    const b = bayW(w);
+
+    document.getElementById('widthNum').textContent = w;
+    document.getElementById('sW').textContent = w + ' cm';
+    document.getElementById('sD').textContent = benchDepth + ' cm';
+    document.getElementById('sH').textContent = benchHeight + ' cm';
+    document.getElementById('sS').textContent = Math.max(1, n);
+    document.getElementById('sT').textContent = w + ' cm';
+    document.getElementById('sB').textContent = n === 0 ? '—' : b + ' cm';
+    document.getElementById('sN').textContent = n;
+
+    document.getElementById('svgTop').innerHTML = '';
+    document.getElementById('svgTop').appendChild(drawTop());
+
+    document.getElementById('svgFront').innerHTML = '';
+    document.getElementById('svgFront').appendChild(drawSide());
+
+    document.getElementById('svgSide').innerHTML = '';
+    document.getElementById('svgSide').appendChild(drawFront());
+  } catch (err) {
+    console.error('Bench Configurator Error:', err);
+  }
+}
+
+// ─── Events ───
+document.getElementById('widthSlider').addEventListener('input', e => {
+  state.width = +e.target.value;
+  update();
+});
+
+update();
+</script>
+</body>
+</html>
