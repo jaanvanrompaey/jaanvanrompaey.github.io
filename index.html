@@ -320,13 +320,19 @@ touch-action: manipulation;
   .project-block { grid-template-columns: 1fr; }
   .lightbox-iframe-wrapper { width: 95vw; max-width: 100%; }
 
-  /* FIXED: Mobile Lightbox Navigation Visibility */
-  .lightbox { align-items: flex-start; padding-top: 5vh; }
-  .lightbox-content { max-width: 95%; max-height: 80vh; }
+  /* FIXED: Lightbox is now properly centered on mobile */
+  .lightbox { align-items: center; justify-content: center; padding-top: 0; }
+  .lightbox-content { max-width: 95%; max-height: 85vh; }
   .close-btn { top: 15px; right: 20px; font-size: 36px; z-index: 2002; }
   .prev, .next { top: 45%; font-size: 22px; padding: 14px; margin-top: 0; z-index: 2002; }
   .prev { left: 15px; } .next { right: 15px; }
+
+  /* FIXED: Prevents text/images from spilling off the right edge */
+  .project-main-image, .thumb-box { max-width: 100%; }
+  .thumb-box { width: 100%; max-width: 150px; }
+  .project-thumbnails { flex-wrap: wrap; justify-content: center; gap: 10px; }
 }
+
 </style>
 </head>
 <body>
@@ -627,6 +633,31 @@ if (e.key === 'ArrowLeft') prevBtn.click();
 if (e.key === 'ArrowRight') nextBtn.click();
 }
 });
+
+/* =========================================
+   NEW: Swipe Navigation for Lightbox
+   ========================================= */
+const lightboxContent = document.querySelector('.lightbox-content');
+let touchStartX = 0;
+const SWIPE_THRESHOLD = 50; // Minimum pixels to trigger a swipe
+
+lightboxContent.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+}, { passive: true });
+
+lightboxContent.addEventListener('touchend', e => {
+  const touchEndX = e.changedTouches[0].screenX;
+  const diff = touchStartX - touchEndX;
+
+  // Only trigger if horizontal movement exceeds threshold
+  if (Math.abs(diff) > SWIPE_THRESHOLD) {
+    // Swipe left (negative diff) -> Next
+    if (diff > 0) nextBtn.click();
+    // Swipe right (positive diff) -> Previous
+    else prevBtn.click();
+  }
+}, { passive: true });
+
 
 const projectBlocks = document.querySelectorAll('.project-block');
 projectBlocks.forEach(block => {
