@@ -51,7 +51,6 @@
       position: fixed; top: 0; left: 0; width: 100%;
       height: var(--header-height);
       background-color: var(--header-bg);
-      border-bottom: 1px solid var(--line-color);
       display: flex; justify-content: space-between; align-items: center;
       padding: 0 40px; z-index: 100;
     }
@@ -82,7 +81,7 @@
     .column::-webkit-scrollbar { width: 6px; }
     .column::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         /* ========================================= 4. LEFT COLUMN (Projects) ========================================= */
-    .col-left { border-right: 1px solid var(--line-color); }
+    .col-left { border-right: 1px solid var(--line-color); border-top: 1px solid var(--line-color); }
     .project-list {
       list-style: none; padding: 0;
       display: flex; flex-direction: column; gap: 80px;
@@ -205,7 +204,7 @@
     /* This ensures they are side-by-side on desktop */
     .project-thumbnails {
       display: flex;
-      gap: 10px;
+      gap: 20px;
     }
     /* ========================================= 5. RIGHT COLUMN (Bio & Info) ========================================= */
     .col-right { padding: 40px 30px; border-top: 1px solid var(--line-color); }
