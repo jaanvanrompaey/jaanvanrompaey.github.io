@@ -81,7 +81,7 @@
     }
     .column::-webkit-scrollbar { width: 6px; }
     .column::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-    /* ========================================= 4. LEFT COLUMN (Projects) ========================================= */
+        /* ========================================= 4. LEFT COLUMN (Projects) ========================================= */
     .col-left { border-right: 1px solid var(--line-color); }
     .project-list {
       list-style: none; padding: 0;
@@ -201,6 +201,12 @@
       max-width: 800px;
       margin: 0;
     }
+    /* ========================================= MOBILE FIX: Thumbnails Container (Restored Global) ========================================= */
+    /* This ensures they are side-by-side on desktop */
+    .project-thumbnails {
+      display: flex;
+      gap: 10px;
+    }
     /* ========================================= 5. RIGHT COLUMN (Bio & Info) ========================================= */
     .col-right { padding: 40px 30px; border-top: 1px solid var(--line-color); }
     .info-section { margin-bottom: 40px; }
@@ -281,15 +287,9 @@
       .project-credits { order: 3; }
       .project-description { order: 4; }
       /* ——— END MOBILE PROJECT REORDERING ——— */
-      .lightbox-iframe-wrapper { width: 95vw; max-width: 100%; }
-      .lightbox { align-items: center; justify-content: center; padding-top: 0; }
-      .lightbox-content { max-width: 95%; max-height: 85vh; }
-      .close-btn { top: 15px; right: 20px; font-size: 36px; z-index: 2002; }
-      .prev, .next { top: 45%; font-size: 22px; padding: 14px; margin-top: 0; z-index: 2002; }
-      .prev { left: 15px; } .next { right: 15px; }
+      
+      /* Mobile specific adjustments for thumbnails (scaling/centering) */
       .project-thumbnails {
-        display: flex;
-        gap: 10px;
         justify-content: center;
         width: 100%;
       }
@@ -300,6 +300,13 @@
         aspect-ratio: 3 / 2;
         min-width: 80px;
       }
+      
+      .lightbox-iframe-wrapper { width: 95vw; max-width: 100%; }
+      .lightbox { align-items: center; justify-content: center; padding-top: 0; }
+      .lightbox-content { max-width: 95%; max-height: 85vh; }
+      .close-btn { top: 15px; right: 20px; font-size: 36px; z-index: 2002; }
+      .prev, .next { top: 45%; font-size: 22px; padding: 14px; margin-top: 0; z-index: 2002; }
+      .prev { left: 15px; } .next { right: 15px; }
       .project-main-image, .thumb-box { max-width: 100%; }
     }
   </style>
