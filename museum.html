@@ -137,71 +137,50 @@
         const TOLERANCE = 100;
         const MIN_DIM = 100;
         const SCALE_FACTOR = 0.3; // 70% reduction
-        const MAX_STEPS = 15;
+        const QUALITY_STEP = 10;  // Quality drop per step once floor is hit
+        const MAX_STEPS = 20;
 
         addLog(`📥 Processing: ${img.naturalWidth}x${img.naturalHeight}`);
 
-        let currentScale = 1.0;
+        let currentW = img.naturalWidth;
+        let currentH = img.naturalHeight;
+        let quality = 85;
+        let hitFloor = false;
         let bestBlob = null;
-        let bestW = img.naturalWidth;
-        let bestH = img.naturalHeight;
 
         for (let i = 1; i <= MAX_STEPS; i++) {
-          // 70% dimension reduction
-          currentScale *= SCALE_FACTOR;
-          let w = Math.floor(img.naturalWidth * currentScale);
-          let h = Math.floor(img.naturalHeight * currentScale);
+          if (!hitFloor) {
+            // 70% dimension reduction
+            currentW = Math.floor(currentW * SCALE_FACTOR);
+            currentH = Math.floor(currentH * SCALE_FACTOR);
 
-          // 100px floor on shortest edge (preserves aspect ratio)
-          const minDim = Math.min(w, h);
-          if (minDim < MIN_DIM) {
-            const adjust = MIN_DIM / minDim;
-            w = Math.floor(w * adjust);
-            h = Math.floor(h * adjust);
+            // Enforce 100px floor on shortest edge (preserves aspect ratio)
+            const minDim = Math.min(currentW, currentH);
+            if (minDim < MIN_DIM) {
+              const adjust = MIN_DIM / minDim;
+              currentW = Math.floor(currentW * adjust);
+              currentH = Math.floor(currentH * adjust);
+              hitFloor = true; // Stop scaling dimensions, switch to quality
+            }
+          } else {
+            // Hit floor: reduce quality instead of dimensions
+            quality = Math.max(1, quality - QUALITY_STEP);
           }
 
-          let quality = 85;
-          try {
-            const blob = await canvasToBlob(img, w, h, quality);
-            addLog(`[Step ${i}] ${w}x${h} | Q:${quality} | ${blob.size} bytes`);
+          // Generate blob
+          const blob = await canvasToBlob(img, currentW, currentH, quality);
+          addLog(`[Step ${i}] ${currentW}x${currentH} | Q:${quality} | ${blob.size} bytes`);
 
-            // Check if around 512 (±100 bytes)
-            if (blob.size >= TARGET - TOLERANCE && blob.size <= TARGET + TOLERANCE) {
-              bestBlob = blob;
-              bestW = w;
-              bestH = h;
-              addLog(`✅ Hit target range (~512B) at ${w}x${h}`, 'success');
-              break;
-            }
+          // Check if around 512 (±100 bytes)
+          if (blob.size >= TARGET - TOLERANCE && blob.size <= TARGET + TOLERANCE) {
+            bestBlob = blob;
+            addLog(`✅ Hit target range (~512B) at ${currentW}x${currentH}`, 'success');
+            break;
+          }
 
-            // Track closest if we overshoot or haven't hit target yet
-            if (!bestBlob || (blob.size < bestBlob.size && blob.size > TARGET + TOLERANCE)) {
-              bestBlob = blob;
-              bestW = w;
-              bestH = h;
-            }
-          } catch (blobErr) {
-            // Graceful fallback: reduce dimensions by 50% and retry once
-            addLog(`⚠️ Blob failed at ${w}x${h}. Reducing dimensions and retrying...`, 'error');
-            w = Math.max(MIN_DIM, Math.floor(w * 0.5));
-            h = Math.max(MIN_DIM, Math.floor(h * 0.5));
-            
-            const retryBlob = await canvasToBlob(img, w, h, quality);
-            addLog(`[Retry] ${w}x${h} | Q:${quality} | ${retryBlob.size} bytes`);
-            
-            if (retryBlob.size >= TARGET - TOLERANCE && retryBlob.size <= TARGET + TOLERANCE) {
-              bestBlob = retryBlob;
-              bestW = w;
-              bestH = h;
-              addLog(`✅ Hit target range (~512B) at ${w}x${h}`, 'success');
-              break;
-            }
-            
-            if (!bestBlob || (retryBlob.size < bestBlob.size && retryBlob.size > TARGET + TOLERANCE)) {
-              bestBlob = retryBlob;
-              bestW = w;
-              bestH = h;
-            }
+          // Keep track of closest valid if we overshoot
+          if (!bestBlob || (blob.size < bestBlob.size && blob.size > TARGET + TOLERANCE)) {
+            bestBlob = blob;
           }
 
           await delay(50); // UI yield
