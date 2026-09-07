@@ -97,6 +97,153 @@
     const finalPreview = document.getElementById('finalPreview');
     const downloadLink = document.getElementById('downloadLink');
 
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const url = URL.createObjectURL(file);
+      originalPreview.src = url;
+      originalInfo.textContent = `${file.name} | ${(file.size/1024).toFixed(1)} KB | ${file.type.split('/')[1].toUpperCase()}`;
+      
+      previewSection.classList.remove('hidden');
+      logSection.classList.add('hidden');
+      resultSection.classList.add('hidden');
+      convertBtn.disabled = false;
+    });
+
+    convertBtn.addEventListener('click', async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      
+      convertBtn.disabled = true;
+      logSection.classList.remove('hidden');
+      resultSection.classList.add('hidden');
+      logOutput.innerHTML = '';
+
+      // Hardcoded optimization parameters (no user control)
+      const options = {
+        targetSizeBytes: 512,
+        qualityStep: 10,
+        dimensionStep: 0.05,    // Reduced from 0.1 to 0.05 (5% per step)
+        maxIterations: 30,       // Increased for smoother progression
+        stallThreshold: 50,
+        maxStalls: 5
+      };
+
+      const img = await loadImage(file);
+      const baseName = file.name.replace(/\.[^/.]+$/, "");
+      const outExt = '.jpg';
+
+      let prevFileSize = Infinity;
+      let stallCount = 0;
+      let finalResult = null;
+
+      for (let i = 1; i <= options.maxIterations; i++) {
+        const reductionFactor = Math.max(0.0, 1.0 - (i * options.dimensionStep));
+        
+        // 100px FLOOR + original size cap to prevent stretching tiny images
+        const targetW = Math.max(100, Math.floor(img.width * reductionFactor));
+        const targetH = Math.max(100, Math.floor(img.height * reductionFactor));
+        const finalW = Math.min(img.width, targetW);
+        const finalH = Math.min(img.height, targetH);
+        
+        const currentQuality = Math.max(1, 100 - (i * options.qualityStep));
+        const outputName = `${baseName}_v${i}${outExt}`;
+
+        // Small delay so the UI can render each step visibly
+        await new Promise(r => setTimeout(r, 250));
+
+        const blob = await canvasToBlob(img, finalW, finalH, currentQuality);
+        const fileSize = blob.size;
+
+        const logLine = document.createElement('div');
+        logLine.textContent = `[${i}] ${finalW}x${finalH} | Q:${currentQuality} | ${fileSize} bytes`;
+        logOutput.appendChild(logLine);
+        logOutput.scrollTop = logOutput.scrollHeight;
+
+        if (fileSize <= options.targetSizeBytes) {
+          logLine.classList.add('success');
+          finalResult = { blob, name: outputName, size: fileSize };
+          break;
+        }
+
+        if (Math.abs(fileSize - prevFileSize) < options.stallThreshold) {
+          stallCount++;
+          if (stallCount >= options.maxStalls) {
+            logLine.classList.add('stalled');
+            finalResult = { blob, name: outputName, size: fileSize };
+            break;
+          }
+        } else {
+          stallCount = 0;
+        }
+        prevFileSize = fileSize;
+      }
+
+      if (finalResult) {
+        const url = URL.createObjectURL(finalResult.blob);
+        finalPreview.src = url;
+        resultSection.classList.remove('hidden');
+        downloadLink.href = url;
+        downloadLink.download = finalResult.name;
+      } else {
+        logOutput.innerHTML += `<div class="error">⚠️ Could not reach ≤${options.targetSizeBytes} bytes within limits.</div>`;
+      }
+      convertBtn.disabled = false;
+    });
+
+    function loadImage(file) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    function canvasToBlob(img, w, h, quality) {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        
+        ctx.imageSmoothingQuality = 'high';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        
+        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality / 100);
+      });
+    }
+  </script>
+</body>
+</html>
+
+    <div id="logSection" class="log-section hidden">
+      <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">📜 Optimization Steps</h3>
+      <div id="logOutput" class="log-box"></div>
+    </div>
+
+    <div id="resultSection" class="result-section hidden">
+      <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">✅ Optimized Result</h3>
+      <img id="finalPreview" class="preview-img large" alt="Final Preview">
+      <a id="downloadLink" class="btn">⬇️ Download Final Image</a>
+    </div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const previewSection = document.getElementById('previewSection');
+    const originalPreview = document.getElementById('originalPreview');
+    const originalInfo = document.getElementById('originalInfo');
+    const convertBtn = document.getElementById('convertBtn');
+    const logSection = document.getElementById('logSection');
+    const logOutput = document.getElementById('logOutput');
+    const resultSection = document.getElementById('resultSection');
+    const finalPreview = document.getElementById('finalPreview');
+    const downloadLink = document.getElementById('downloadLink');
+
     let currentFile = null;
 
     // 1. Handle Upload & Show Preview
