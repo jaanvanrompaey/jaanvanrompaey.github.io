@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Two-Phase Image Optimizer</title>
+  <title>Block Pixelation Optimizer</title>
   <style>
     :root {
       --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --accent: #38bdf8;
@@ -68,7 +68,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>🎯 Two-Phase Image Optimizer</h1>
+    <h1>🎨 Block Pixelation Optimizer</h1>
     
     <label class="upload-area" for="fileInput">
       📁 Click to upload image (PNG, JPG, WebP, etc.)
@@ -109,28 +109,31 @@
 
     const delay = ms => new Promise(r => setTimeout(r, ms));
 
-    // FIXED: Properly wraps toBlob in a Promise (requires callback as 1st argument)
-    function canvasToBlob(canvas, mimeType = 'image/jpeg', quality = 0.85) {
-      return new Promise(resolve => {
-        canvas.toBlob(resolve, mimeType, quality);
-      });
-    }
-
-    // Simple color quantization to reduce color data without changing pixels
-    function quantizeCanvas(canvas, numColors) {
+    // Renders the image using "Block Pixelation" (Big Color Blocks)
+    function renderBlockStyle(img, blockSize) {
+      const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imgData.data;
       
-      const bits = Math.max(1, Math.ceil(Math.log2(numColors)));
-      const step = 256 / Math.pow(2, bits);
+      // Calculate block dimensions
+      const blockW = Math.max(1, Math.floor(img.width / blockSize));
+      const blockH = Math.max(1, Math.floor(img.height / blockSize));
       
-      for (let i = 0; i < data.length; i += 4) {
-        data[i]     = Math.round(data[i] / step) * step;
-        data[i + 1] = Math.round(data[i + 1] / step) * step;
-        data[i + 2] = Math.round(data[i + 2] / step) * step;
-      }
-      ctx.putImageData(imgData, 0, 0);
+      // Create a small canvas to draw the image at low resolution
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = blockW;
+      tempCanvas.height = blockH;
+      const tempCtx = tempCanvas.getContext('2d');
+      
+      // Draw image small (pixelates it)
+      tempCtx.drawImage(img, 0, 0, blockW, blockH);
+      
+      // Draw the small canvas back to the main canvas, scaled up
+      // Nearest Neighbor interpolation creates the "big color blocks" look
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(tempCanvas, 0, 0, blockW, blockH, 0, 0, img.width, img.height);
+      
       return canvas;
     }
 
@@ -176,12 +179,9 @@
       try {
         const img = await loadImage(file);
         const baseName = file.name.replace(/\.[^/.]+$/, "");
-        const STOP_DIM = 50;
-        const COLOR_PALETTE_STEPS = [256, 128, 64, 32, 16, 8, 4, 2, 1];
 
         let currentW = img.naturalWidth;
         let currentH = img.naturalHeight;
-        let colorStepIndex = 0;
         let prevFileSize = 0;
         let stallCount = 0;
         let finalResult = null;
@@ -190,30 +190,26 @@
           let stepDesc = '';
           let blob;
 
-          if (currentW > STOP_DIM || currentH > STOP_DIM) {
-            currentW = Math.max(1, Math.floor(currentW * (1 - options.dimensionStep)));
-            currentH = Math.max(1, Math.floor(currentH * (1 - options.dimensionStep)));
-            
-            const scaleCanvas = document.createElement('canvas');
-            scaleCanvas.width = currentW;
-            scaleCanvas.height = currentH;
-            scaleCanvas.getContext('2d').drawImage(img, 0, 0, currentW, currentH);
-            blob = await canvasToBlob(scaleCanvas, 'image/jpeg', 0.85); // FIXED
-            stepDesc = `${currentW}x${currentH}`;
-          } else {
-            if (colorStepIndex < COLOR_PALETTE_STEPS.length) {
-              const targetColors = COLOR_PALETTE_STEPS[colorStepIndex++];
-              const colorCanvas = document.createElement('canvas');
-              colorCanvas.width = Math.max(1, currentW);
-              colorCanvas.height = Math.max(1, currentH);
-              colorCanvas.getContext('2d').drawImage(img, 0, 0, colorCanvas.width, colorCanvas.height);
-              quantizeCanvas(colorCanvas, targetColors);
-              blob = await canvasToBlob(colorCanvas, 'image/png'); // FIXED
-              stepDesc = `Colors: ${targetColors}`;
-            } else {
-              break;
-            }
-          }
+          // 70% Dimension Reduction (Python logic)
+          currentW = Math.max(1, Math.floor(currentW * (1 - options.dimensionStep)));
+          currentH = Math.max(1, Math.floor(currentH * (1 - options.dimensionStep)));
+
+          // Create Block Style Canvas
+          const blockCanvas = document.createElement('canvas');
+          blockCanvas.width = currentW;
+          blockCanvas.height = currentH;
+          const blockCtx = blockCanvas.getContext('2d');
+          
+          // Calculate block size (e.g., 10x10 blocks)
+          const blockSize = Math.max(1, Math.floor(currentW / 10));
+          
+          // Render using Block Style (Big Color Blocks)
+          blockCtx.drawImage(img, 0, 0, currentW, currentH);
+          const finalCanvas = renderBlockStyle(blockCanvas, blockSize);
+          
+          // Save as JPEG
+          blob = await canvasToBlob(finalCanvas, 'image/jpeg', 0.85);
+          stepDesc = `${currentW}x${currentH} (BlockSize: ${blockSize})`;
 
           const fileSize = blob ? blob.size : 0;
           const stepDiv = document.createElement('div');
@@ -226,8 +222,7 @@
           
           const info = document.createElement('div');
           info.className = 'step-info';
-          const phase = (currentW > STOP_DIM || currentH > STOP_DIM) ? 'SCALE' : 'COLOR';
-          info.textContent = `[${i}] Phase: ${phase} | ${stepDesc} | ${fileSize} bytes`;
+          info.textContent = `[${i}] SCALE | ${stepDesc} | ${fileSize} bytes`;
           
           stepDiv.appendChild(thumb);
           stepDiv.appendChild(info);
@@ -241,6 +236,49 @@
             info.textContent = `[${i}] ✅ Target Hit: ${stepDesc} | ${fileSize} bytes`;
             finalResult = { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
             break;
+          }
+
+          // If we are past the 50px floor, we can't scale down further.
+          // We must reduce JPEG quality to hit 512 bytes.
+          if (currentW <= 50 || currentH <= 50) {
+            // Reduce quality aggressively
+            const quality = Math.max(1, 85 - ((i - 5) * 15));
+            const qualityBlob = await canvasToBlob(finalCanvas, 'image/jpeg', quality / 100);
+            const qualitySize = qualityBlob.size;
+
+            const qualityStepDiv = document.createElement('div');
+            qualityStepDiv.className = 'step-row';
+            
+            const qThumbUrl = URL.createObjectURL(qualityBlob);
+            const qThumb = document.createElement('img');
+            qThumb.src = qThumbUrl;
+            qThumb.className = 'step-thumb';
+            
+            const qInfo = document.createElement('div');
+            qInfo.className = 'step-info';
+            qInfo.textContent = `[${i}] QUALITY | ${stepDesc} | Q:${quality} | ${qualitySize} bytes`;
+            
+            qualityStepDiv.appendChild(qThumb);
+            qualityStepDiv.appendChild(qInfo);
+            stepsBox.appendChild(qualityStepDiv);
+            stepsBox.scrollTop = stepsBox.scrollHeight;
+
+            await delay(150);
+
+            if (qualitySize <= options.targetSizeBytes) {
+              qInfo.classList.add('success');
+              qInfo.textContent = `[${i}] ✅ Target Hit: ${stepDesc} | Q:${quality} | ${qualitySize} bytes`;
+              finalResult = { blob: qualityBlob, name: `${baseName}_optimized.jpg`, size: qualitySize };
+              break;
+            }
+
+            // If quality is 1 and still too big, we are stuck.
+            if (quality <= 1) {
+              qInfo.classList.add('error');
+              qInfo.textContent = `[${i}] ❌ Could not reach ≤${options.targetSizeBytes} bytes.`;
+              stepsBox.appendChild(qInfo);
+              break;
+            }
           }
 
           if (prevFileSize > 0 && Math.abs(fileSize - prevFileSize) < options.stallThreshold) {
@@ -296,6 +334,12 @@
         };
         img.onerror = () => reject(new Error('Failed to load image. Try a different file format.'));
         img.src = URL.createObjectURL(file);
+      });
+    }
+
+    function canvasToBlob(canvas, mimeType = 'image/jpeg', quality = 0.85) {
+      return new Promise(resolve => {
+        canvas.toBlob(resolve, mimeType, quality);
       });
     }
   </script>
