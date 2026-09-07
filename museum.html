@@ -3,131 +3,264 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Block Pixelation Optimizer (25px Floor)</title>
+  <title>MUSEUM OF OPTIMISED ART</title>
   <style>
+    /* === MUSEUM AESTHETIC === */
     :root {
-      --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --accent: #38bdf8;
-      --success: #22c55e; --warn: #f59e0b; --error: #ef4444; --border: #334155;
+      --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --color-bg: #ffffff;
+      --color-text: #000000;
+      --border-width: 2px;
+      --border-color: #000000;
+      --gray-placeholder: #cccccc;
     }
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: var(--bg); color: var(--text);
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100vh; margin: 0; padding: 20px;
-    }
-    .container {
-      background: var(--card); padding: 2rem; border-radius: 12px;
-      border: 1px solid var(--border); width: 100%; max-width: 650px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-    }
-    h1 { margin: 0 0 1.5rem; text-align: center; font-size: 1.4rem; }
-    .upload-area {
-      border: 2px dashed var(--border); padding: 1.5rem; text-align: center;
-      border-radius: 8px; cursor: pointer; transition: 0.2s;
-    }
-    .upload-area:hover { border-color: var(--accent); background: rgba(56, 189, 248, 0.05); }
-    input[type="file"] { display: none; }
-    .btn {
-      display: inline-block; padding: 10px 20px; background: var(--accent);
-      color: #000; font-weight: 600; border-radius: 6px; text-decoration: none;
-      cursor: pointer; transition: 0.2s; margin-top: 1rem; border: none; font-size: 1rem;
-    }
-    .btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .hidden { display: none !important; }
-    
-    .preview-section { margin-top: 1.5rem; text-align: center; }
-    .preview-img {
-      max-height: 200px; max-width: 100%; border-radius: 6px;
-      margin: 10px 0; object-fit: contain; background: #000;
-    }
-    .preview-img.large { max-height: 450px; border: 2px solid var(--success); }
-    .meta { font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.5rem; }
 
-    .steps-section { margin-top: 1.5rem; }
-    .steps-box {
-      background: #0b1120; border: 1px solid var(--border); border-radius: 8px;
-      padding: 1rem; max-height: 350px; overflow-y: auto;
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+      background: var(--color-bg);
+      color: var(--color-text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* Prevent scrolling, fit to screen */
     }
-    .step-row {
-      display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+
+    /* Header */
+    header {
+      padding: 20px;
+      border-bottom: var(--border-width) solid var(--border-color);
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 800;
+    }
+
+    /* Main Layout */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    /* Upload State */
+    #uploadState {
+      display: flex;
+      flex: 1;
+      justify-content: flex-end; /* Align bottom right */
+      align-items: flex-end;
+      padding-bottom: 40px;
+      padding-right: 40px;
+    }
+
+    .museum-btn {
+      background: transparent;
+      border: var(--border-width) solid var(--border-color);
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .museum-btn:hover {
+      background: var(--color-text);
+      color: var(--color-bg);
+    }
+
+    /* Gallery / Steps Grid */
+    #galleryState {
+      display: none; /* Hidden initially */
+      flex: 1;
+      flex-direction: column;
+      gap: 15px;
+      height: 100%;
+    }
+
+    /* The Row of 5 Steps */
+    .steps-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr); /* 5 equal columns */
+      gap: 10px;
+      height: 60%; /* Takes up 60% of the gallery space */
       align-items: center;
     }
-    .step-thumb {
-      width: 60px; height: auto; border-radius: 4px; background: #000;
-      object-fit: contain; flex-shrink: 0;
-    }
-    .step-info { font-family: monospace; font-size: 0.85rem; line-height: 1.4; }
-    .step-info.success { color: var(--success); font-weight: bold; }
-    .step-info.stalled { color: var(--warn); }
-    .step-info.error { color: var(--error); }
-    .step-info.phase { color: var(--accent); font-weight: 600; }
 
-    .result-section { margin-top: 1.5rem; text-align: center; }
+    .step-slot {
+      border: 1px solid var(--border-color);
+      aspect-ratio: 1 / 1; /* Square */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--gray-placeholder); /* Placeholder color */
+      position: relative;
+    }
+
+    .step-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: none; /* Hidden until loaded */
+    }
+
+    .step-slot.loaded img {
+      display: block;
+    }
+
+    .step-label {
+      margin-top: 5px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* Bottom Section (Final + Submit) */
+    .bottom-section {
+      display: flex;
+      height: 35%; /* Takes up 35% of gallery space */
+      gap: 20px;
+    }
+
+    /* Final Result Area */
+    #finalArea {
+      flex: 1;
+      border: var(--border-width) solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--gray-placeholder);
+    }
+
+    #finalArea img {
+      max-width: 90%;
+      max-height: 80%;
+      object-fit: contain;
+      display: none;
+    }
+
+    #finalArea.loaded img {
+      display: block;
+    }
+
+    #finalLabel {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    /* Submit Button Area */
+    #submitArea {
+      flex: 0 0 250px; /* Fixed width for button area */
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding-bottom: 10px;
+    }
+
+    /* Hidden Input */
+    #fileInput {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎨 Block Pixelation Optimizer (25px Floor)</h1>
-    
-    <label class="upload-area" for="fileInput">
-      📁 Click to upload image (PNG, JPG, WebP, etc.)
+
+  <header>
+    <h1>MUSEUM OF OPTIMISED ART</h1>
+  </header>
+
+  <main>
+    <!-- 1. Initial Upload State -->
+    <div id="uploadState">
+      <label for="fileInput" class="museum-btn">
+        UPLOAD IMAGE
+      </label>
       <input type="file" id="fileInput" accept="image/*">
-    </label>
-
-    <div id="previewSection" class="preview-section hidden">
-      <p class="meta" id="originalInfo"></p>
-      <img id="originalPreview" class="preview-img" alt="Original Preview">
-      <button id="convertBtn" class="btn">🔄 Convert & Show Steps</button>
     </div>
 
-    <div id="stepsSection" class="steps-section hidden">
-      <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">📜 Optimization Steps</h3>
-      <div id="stepsBox" class="steps-box"></div>
-    </div>
+    <!-- 2. Processing / Gallery State -->
+    <div id="galleryState">
+      <!-- The 5 Steps Row -->
+      <div class="steps-row" id="stepsRow">
+        <!-- Generated by JS: 5 slots -->
+      </div>
 
-    <div id="resultSection" class="result-section hidden">
-      <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">✅ Final Optimized Image</h3>
-      <img id="finalPreview" class="preview-img large" alt="Final Preview">
-      <a id="downloadLink" class="btn">⬇️ Download Final Image</a>
-      <button id="resetBtn" class="btn" style="background: var(--border); color: var(--text); margin-left: 10px;">🔄 Reset</button>
-    </div>
-  </div>
+      <!-- Bottom Section -->
+      <div class="bottom-section">
+        <!-- Final Result -->
+        <div id="finalArea">
+          <img id="finalImage" alt="Final Result">
+          <div id="finalLabel">FINAL STEP: --- BYTES</div>
+        </div>
 
-    <script>
+        <!-- Submit Button -->
+        <div id="submitArea">
+          <button class="museum-btn" onclick="alert('Work submitted to the museum archive.')">
+            SUBMIT WORK
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
     const fileInput = document.getElementById('fileInput');
-    const previewSection = document.getElementById('previewSection');
-    const originalPreview = document.getElementById('originalPreview');
-    const originalInfo = document.getElementById('originalInfo');
-    const convertBtn = document.getElementById('convertBtn');
-    const stepsSection = document.getElementById('stepsSection');
-    const stepsBox = document.getElementById('stepsBox');
-    const resultSection = document.getElementById('resultSection');
-    const finalPreview = document.getElementById('finalPreview');
-    const downloadLink = document.getElementById('downloadLink');
-    const resetBtn = document.getElementById('resetBtn');
+    const uploadState = document.getElementById('uploadState');
+    const galleryState = document.getElementById('galleryState');
+    const stepsRow = document.getElementById('stepsRow');
+    const finalArea = document.getElementById('finalArea');
+    const finalImage = document.getElementById('finalImage');
+    const finalLabel = document.getElementById('finalLabel');
 
-    const delay = ms => new Promise(r => setTimeout(r, ms));
+    // Initialize the 5 Step Slots in HTML
+    for (let i = 1; i <= 5; i++) {
+      const slot = document.createElement('div');
+      slot.className = 'step-slot';
+      slot.id = `step-${i}`;
+      
+      const img = document.createElement('img');
+      img.src = ''; 
+      img.alt = `Step ${i}`;
+      
+      const label = document.createElement('div');
+      label.className = 'step-label';
+      label.innerText = `STEP ${i}: --- BYTES`;
 
+      slot.appendChild(img);
+      slot.appendChild(label);
+      stepsRow.appendChild(slot);
+    }
+
+    // Helper: Canvas to Blob
     function canvasToBlob(canvas, mimeType = 'image/jpeg', quality = 0.85) {
       return new Promise((resolve, reject) => {
         canvas.toBlob((blob) => {
           if (blob) resolve(blob);
-          else reject(new Error('Canvas toBlob failed. Check browser compatibility.'));
+          else reject(new Error('Canvas toBlob failed.'));
         }, mimeType, quality);
       });
     }
 
-    // ✅ HEAVIER COLOR BLOCKING ALGORITHM
+    // Helper: Heavy Block Rendering
     function renderBlockStyle(img, targetW, targetH, blockSize = 8) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-
-      // 1. Calculate grid size based on block size
       const gridW = Math.max(1, Math.ceil(targetW / blockSize));
       const gridH = Math.max(1, Math.ceil(targetH / blockSize));
 
-      // 2. Render to a small intermediate canvas (nearest-neighbor)
       const offCanvas = document.createElement('canvas');
       offCanvas.width = gridW;
       offCanvas.height = gridH;
@@ -135,57 +268,46 @@
       offCtx.imageSmoothingEnabled = false;
       offCtx.drawImage(img, 0, 0, gridW, gridH);
 
-      // 3. Scale the small grid back up to target dimensions (nearest-neighbor)
       canvas.width = targetW;
       canvas.height = targetH;
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(offCanvas, 0, 0, targetW, targetH);
-
       return canvas;
     }
 
-    fileInput.addEventListener('change', (e) => {
+    // Helper: Load Image
+    function loadImage(file) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          if (img.naturalWidth === 0 || img.naturalHeight === 0) {
+            reject(new Error('Invalid image.'));
+          } else {
+            resolve(img);
+          }
+        };
+        img.onerror = () => reject(new Error('Failed to load image.'));
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    fileInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      
-      const url = URL.createObjectURL(file);
-      originalPreview.src = url;
-      originalInfo.textContent = `${file.name} | ${(file.size/1024).toFixed(2)} KB | ${file.type.split('/')[1].toUpperCase()}`;
-      
-      previewSection.classList.remove('hidden');
-      stepsSection.classList.add('hidden');
-      resultSection.classList.add('hidden');
-      convertBtn.disabled = false;
-    });
 
-    resetBtn.addEventListener('click', () => {
-      fileInput.value = '';
-      previewSection.classList.add('hidden');
-      stepsSection.classList.add('hidden');
-      resultSection.classList.add('hidden');
-      stepsBox.innerHTML = '';
-    });
-
-    convertBtn.addEventListener('click', async () => {
-      const file = fileInput.files[0];
-      if (!file) return;
+      // UI Transition
+      uploadState.style.display = 'none';
+      galleryState.style.display = 'flex';
       
-      convertBtn.disabled = true;
-      stepsSection.classList.remove('hidden');
-      resultSection.classList.add('hidden');
-      stepsBox.innerHTML = '';
-
-      // ✅ TUNED FOR 4-6 STEPS (Matches Python linear logic)
-      const options = {
-        targetSizeBytes: 512,
-        qualityStep: 20,          // Drops 20 quality points per step (100 → 80 → 60 → 40 → 20 → 1)
-        dimensionStep: 0.2,       // Reduces dimensions by 20% of original per step
-        maxIterations: 6,         // Caps the loop at 6 steps
-        stallThreshold: 50,
-        maxStalls: 5,
-        MIN_DIM: 25,
-        blockSize: 8
-      };
+      // Reset UI
+      document.querySelectorAll('.step-slot').forEach(slot => {
+        slot.classList.remove('loaded');
+        slot.querySelector('img').src = '';
+        slot.querySelector('.step-label').innerText = `STEP ${slot.id.split('-')[1]}: --- BYTES`;
+      });
+      finalArea.classList.remove('loaded');
+      finalImage.src = '';
+      finalLabel.innerText = 'FINAL STEP: --- BYTES';
 
       try {
         const img = await loadImage(file);
@@ -193,115 +315,84 @@
         const origW = img.naturalWidth;
         const origH = img.naturalHeight;
 
+        // Options (Tuned for 5 steps)
+        const options = {
+          targetSizeBytes: 512,
+          qualityStep: 20,
+          dimensionStep: 0.2,
+          maxIterations: 5, // Matches the 5 visual slots
+          MIN_DIM: 25,
+          blockSize: 8
+        };
+
         let prevFileSize = 0;
-        let stallCount = 0;
         let finalResult = null;
 
         for (let i = 1; i <= options.maxIterations; i++) {
-          // ✅ LINEAR DIMENSION REDUCTION (Matches Python)
+          // Linear Dimension Reduction
           const reductionFactor = Math.max(0, 1 - (i * options.dimensionStep));
           let currentW = Math.max(options.MIN_DIM, Math.floor(origW * reductionFactor));
           let currentH = Math.max(options.MIN_DIM, Math.floor(origH * reductionFactor));
 
-          // ✅ LINEAR QUALITY REDUCTION (Matches Python)
+          // Linear Quality Reduction
           const currentQuality = Math.max(1, 100 - (i * options.qualityStep));
           const qualityNorm = currentQuality / 100;
 
-          // Render & Compress (using heavier block algorithm)
+          // Render
           const blockCanvas = renderBlockStyle(img, currentW, currentH, options.blockSize);
           const blob = await canvasToBlob(blockCanvas, 'image/jpeg', qualityNorm);
           const fileSize = blob.size;
 
-          // UI Step Rendering
-          const stepDiv = document.createElement('div');
-          stepDiv.className = 'step-row';
-          
-          const thumbUrl = URL.createObjectURL(blob);
-          const thumb = document.createElement('img');
-          thumb.src = thumbUrl;
-          thumb.className = 'step-thumb';
-          
-          const info = document.createElement('div');
-          info.className = 'step-info';
-          info.textContent = `[${i}] ${currentW}x${currentH} | Q:${currentQuality} | ${fileSize} bytes`;
-          
-          stepDiv.appendChild(thumb);
-          stepDiv.appendChild(info);
-          stepsBox.appendChild(stepDiv);
-          stepsBox.scrollTop = stepsBox.scrollHeight;
+          // Update UI for this step
+          const slot = document.getElementById(`step-${i}`);
+          const slotImg = slot.querySelector('img');
+          const slotLabel = slot.querySelector('.step-label');
 
-          await delay(150); // UI yield for visible progression
+          slotImg.src = URL.createObjectURL(blob);
+          slotLabel.innerText = `STEP ${i}: ${fileSize} BYTES`;
+          slot.classList.add('loaded');
 
-          // ✅ Success Check (Matches Python)
+          // Success Check
           if (fileSize <= options.targetSizeBytes) {
-            info.classList.add('success');
-            info.textContent = `[${i}] ✅ Success! Final file: ${currentW}x${currentH} (${fileSize} bytes)`;
             finalResult = { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
             break;
           }
 
-          // ✅ Stall Detection (Matches Python exactly)
-          if (prevFileSize > 0 && Math.abs(fileSize - prevFileSize) < options.stallThreshold) {
-            stallCount++;
-            if (stallCount >= options.maxStalls) {
-              info.classList.add('stalled');
-              info.textContent = `[${i}] ⚠️ Linear optimization stalled. Returning best available: ${currentW}x${currentH}`;
-              finalResult = finalResult || { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
-              break;
-            }
-          } else {
-            stallCount = 0;
+          // Stall Detection
+          if (prevFileSize > 0 && Math.abs(fileSize - prevFileSize) < 50) {
+             // If stalled, just take the current one as best available
+             finalResult = finalResult || { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
+             break;
           }
-          prevFileSize = fileSize;
-
-          // Track best result so far for fallback
+          
+          // Track best result
           if (!finalResult || fileSize < finalResult.size) {
             finalResult = { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
           }
+
+          prevFileSize = fileSize;
+          
+          // Delay for "one by one" reveal
+          await new Promise(r => setTimeout(r, 800)); 
         }
 
-        // Clean up thumbnail URLs to prevent memory leaks
-        document.querySelectorAll('.step-thumb').forEach(thumb => URL.revokeObjectURL(thumb.src));
-
+        // Display Final Result
         if (finalResult) {
           const url = URL.createObjectURL(finalResult.blob);
-          finalPreview.src = url;
-          resultSection.classList.remove('hidden');
-          downloadLink.href = url;
-          downloadLink.download = finalResult.name;
+          finalImage.src = url;
+          finalLabel.innerText = `FINAL STEP: ${finalResult.size} BYTES`;
+          finalArea.classList.add('loaded');
         } else {
-          const warning = document.createElement('div');
-          warning.className = 'step-info error';
-          warning.textContent = `⚠️ Warning: Could not reach ≤${options.targetSizeBytes} bytes.`;
-          stepsBox.appendChild(warning);
+          finalLabel.innerText = "ERROR: Could not optimize.";
         }
+
       } catch (e) {
-        console.error(e);
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'step-info error';
-        errorDiv.textContent = `❌ Error: ${e.message}`;
-        stepsBox.appendChild(errorDiv);
-      } finally {
-        convertBtn.disabled = false;
+        alert("Error: " + e.message);
+        // Reset to upload state
+        uploadState.style.display = 'flex';
+        galleryState.style.display = 'none';
       }
     });
-
-    function loadImage(file) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-          if (img.naturalWidth === 0 || img.naturalHeight === 0) {
-            reject(new Error('Invalid or unsupported image file.'));
-          } else {
-            resolve(img);
-          }
-        };
-        img.onerror = () => reject(new Error('Failed to load image. Try a different file format.'));
-        img.src = URL.createObjectURL(file);
-      });
-    }
   </script>
-
-
 </body>
 </html>
