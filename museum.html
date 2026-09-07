@@ -1,99 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Block Pixelation Optimizer (25px Floor)</title>
-  <style>
-    :root {
-      --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --accent: #38bdf8;
-      --success: #22c55e; --warn: #f59e0b; --error: #ef4444; --border: #334155;
-    }
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: var(--bg); color: var(--text);
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100vh; margin: 0; padding: 20px;
-    }
-    .container {
-      background: var(--card); padding: 2rem; border-radius: 12px;
-      border: 1px solid var(--border); width: 100%; max-width: 650px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-    }
-    h1 { margin: 0 0 1.5rem; text-align: center; font-size: 1.4rem; }
-    .upload-area {
-      border: 2px dashed var(--border); padding: 1.5rem; text-align: center;
-      border-radius: 8px; cursor: pointer; transition: 0.2s;
-    }
-    .upload-area:hover { border-color: var(--accent); background: rgba(56, 189, 248, 0.05); }
-    input[type="file"] { display: none; }
-    .btn {
-      display: inline-block; padding: 10px 20px; background: var(--accent);
-      color: #000; font-weight: 600; border-radius: 6px; text-decoration: none;
-      cursor: pointer; transition: 0.2s; margin-top: 1rem; border: none; font-size: 1rem;
-    }
-    .btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .hidden { display: none !important; }
-    
-    .preview-section { margin-top: 1.5rem; text-align: center; }
-    .preview-img {
-      max-height: 200px; max-width: 100%; border-radius: 6px;
-      margin: 10px 0; object-fit: contain; background: #000;
-    }
-    .preview-img.large { max-height: 450px; border: 2px solid var(--success); }
-    .meta { font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.5rem; }
-
-    .steps-section { margin-top: 1.5rem; }
-    .steps-box {
-      background: #0b1120; border: 1px solid var(--border); border-radius: 8px;
-      padding: 1rem; max-height: 350px; overflow-y: auto;
-    }
-    .step-row {
-      display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-      align-items: center;
-    }
-    .step-thumb {
-      width: 60px; height: auto; border-radius: 4px; background: #000;
-      object-fit: contain; flex-shrink: 0;
-    }
-    .step-info { font-family: monospace; font-size: 0.85rem; line-height: 1.4; }
-    .step-info.success { color: var(--success); font-weight: bold; }
-    .step-info.stalled { color: var(--warn); }
-    .step-info.error { color: var(--error); }
-    .step-info.phase { color: var(--accent); font-weight: 600; }
-
-    .result-section { margin-top: 1.5rem; text-align: center; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>🎨 Block Pixelation Optimizer (25px Floor)</h1>
-    
-    <label class="upload-area" for="fileInput">
-      📁 Click to upload image (PNG, JPG, WebP, etc.)
-      <input type="file" id="fileInput" accept="image/*">
-    </label>
-
-    <div id="previewSection" class="preview-section hidden">
-      <p class="meta" id="originalInfo"></p>
-      <img id="originalPreview" class="preview-img" alt="Original Preview">
-      <button id="convertBtn" class="btn">🔄 Convert & Show Steps</button>
-    </div>
-
-    <div id="stepsSection" class="steps-section hidden">
-      <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">📜 Optimization Steps</h3>
-      <div id="stepsBox" class="steps-box"></div>
-    </div>
-
-    <div id="resultSection" class="result-section hidden">
-      <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">✅ Final Optimized Image</h3>
-      <img id="finalPreview" class="preview-img large" alt="Final Preview">
-      <a id="downloadLink" class="btn">⬇️ Download Final Image</a>
-      <button id="resetBtn" class="btn" style="background: var(--border); color: var(--text); margin-left: 10px;">🔄 Reset</button>
-    </div>
-  </div>
-
   <script>
     const fileInput = document.getElementById('fileInput');
     const previewSection = document.getElementById('previewSection');
@@ -118,13 +22,29 @@
       });
     }
 
-    function renderBlockStyle(img, targetW, targetH) {
+    // ✅ HEAVIER COLOR BLOCKING ALGORITHM
+    function renderBlockStyle(img, targetW, targetH, blockSize = 8) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
+
+      // 1. Calculate grid size based on block size
+      const gridW = Math.max(1, Math.ceil(targetW / blockSize));
+      const gridH = Math.max(1, Math.ceil(targetH / blockSize));
+
+      // 2. Render to a small intermediate canvas (nearest-neighbor)
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = gridW;
+      offCanvas.height = gridH;
+      const offCtx = offCanvas.getContext('2d');
+      offCtx.imageSmoothingEnabled = false;
+      offCtx.drawImage(img, 0, 0, gridW, gridH);
+
+      // 3. Scale the small grid back up to target dimensions (nearest-neighbor)
       canvas.width = targetW;
       canvas.height = targetH;
       ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(img, 0, 0, targetW, targetH);
+      ctx.drawImage(offCanvas, 0, 0, targetW, targetH);
+
       return canvas;
     }
 
@@ -159,7 +79,7 @@
       resultSection.classList.add('hidden');
       stepsBox.innerHTML = '';
 
-      // ✅ Matches Python script defaults & usage example exactly
+      // ✅ Updated options with heavier blocking
       const options = {
         targetSizeBytes: 512,
         qualityStep: 30,
@@ -167,7 +87,8 @@
         maxIterations: 20,
         stallThreshold: 50,
         maxStalls: 5,
-        MIN_DIM: 25
+        MIN_DIM: 25,
+        blockSize: 16 // ⬅️ Higher = heavier/more aggressive color blocking (8, 16, 32)
       };
 
       try {
@@ -190,8 +111,8 @@
           const currentQuality = Math.max(1, 100 - (i * options.qualityStep));
           const qualityNorm = currentQuality / 100;
 
-          // Render & Compress
-          const blockCanvas = renderBlockStyle(img, currentW, currentH);
+          // Render & Compress (using heavier block algorithm)
+          const blockCanvas = renderBlockStyle(img, currentW, currentH, options.blockSize);
           const blob = await canvasToBlob(blockCanvas, 'image/jpeg', qualityNorm);
           const fileSize = blob.size;
 
@@ -284,5 +205,3 @@
       });
     }
   </script>
-</body>
-</html>
