@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Exact 512B Image Optimizer</title>
+  <title>70% Step Image Optimizer</title>
   <style>
     :root {
       --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --accent: #38bdf8;
@@ -60,7 +60,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>🎯 Exact 512B Image Optimizer</h1>
+    <h1>🎯 70% Step Image Optimizer</h1>
     
     <label class="upload-area" for="fileInput">
       📁 Click to upload image (PNG, JPG, WebP, etc.)
@@ -70,7 +70,7 @@
     <div id="previewSection" class="preview-section hidden">
       <p class="meta" id="originalInfo"></p>
       <img id="originalPreview" class="preview-img" alt="Original Preview">
-      <button id="convertBtn" class="btn">🔄 Convert to Exact 512B</button>
+      <button id="convertBtn" class="btn">🔄 Convert (70% Step)</button>
     </div>
 
     <div id="logSection" class="log-section hidden">
@@ -79,9 +79,9 @@
     </div>
 
     <div id="resultSection" class="result-section hidden">
-      <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">✅ Exact 512B Result</h3>
+      <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">✅ Optimized Result</h3>
       <img id="finalPreview" class="preview-img large" alt="Final Preview">
-      <a id="downloadLink" class="btn">⬇️ Download Exact 512B Image</a>
+      <a id="downloadLink" class="btn">⬇️ Download Optimized Image</a>
     </div>
   </div>
 
@@ -134,78 +134,69 @@
         const img = await loadImage(file);
         const baseName = file.name.replace(/\.[^/.]+$/, "");
         const TARGET = 512;
+        const TOLERANCE = 100; // ±100 bytes for "around 512"
         const MIN_DIM = 100;
+        const SCALE_FACTOR = 0.3; // 70% reduction per step
+        const MAX_STEPS = 15;
 
-        addLog(`📥 Processing: ${img.naturalWidth}x${img.naturalHeight} (${(file.size/1024).toFixed(1)} KB)`);
+        addLog(`📥 Processing: ${img.naturalWidth}x${img.naturalHeight}`);
 
-        // Phase 1: Aggressive dimension scaling until Q:1 would be close to target
-        let scale = 1.0;
-        const MAX_CANVAS = 16384;
-        
-        if (img.naturalWidth > MAX_CANVAS || img.naturalHeight > MAX_CANVAS) {
-          throw new Error('Image exceeds browser canvas limits. Try a smaller file.');
-        }
+        let currentScale = 1.0;
+        let bestBlob = null;
+        let bestW = img.naturalWidth;
+        let bestH = img.naturalHeight;
+        let hitFloor = false;
 
-        let finalW = img.naturalWidth;
-        let finalH = img.naturalHeight;
+        for (let i = 1; i <= MAX_STEPS; i++) {
+          // 70% dimension reduction
+          currentScale *= SCALE_FACTOR;
+          let w = Math.floor(img.naturalWidth * currentScale);
+          let h = Math.floor(img.naturalHeight * currentScale);
 
-        while (scale > 0.005) {
-          let w = Math.floor(img.naturalWidth * scale);
-          let h = Math.floor(img.naturalHeight * scale);
-          
-          // Proportionally enforce 100px minimum on shortest edge
+          // 100px floor on shortest edge (preserves aspect ratio)
           const minDim = Math.min(w, h);
           if (minDim < MIN_DIM) {
             const adjust = MIN_DIM / minDim;
             w = Math.floor(w * adjust);
             h = Math.floor(h * adjust);
+            hitFloor = true;
           }
 
-          // Test what Q:1 would produce at these dimensions
-          const blobQ1 = await canvasToBlob(img, w, h, 1);
-          addLog(`[Scale] ${w}x${h} | Q:1 estimate: ${blobQ1.size} bytes`);
+          // Generate blob (constant Q:85 during scaling)
+          const quality = hitFloor ? Math.max(1, 85 - ((i - 2) * 12)) : 85;
+          const blob = await canvasToBlob(img, w, h, quality);
+          addLog(`[Step ${i}] ${w}x${h} | Q:${quality} | ${blob.size} bytes`);
 
-          // Stop scaling when Q:1 is within 3x target (gives quality search room)
-          if (blobQ1.size <= TARGET * 3) {
-            finalW = w;
-            finalH = h;
+          // Check if around 512 (±100 bytes)
+          if (blob.size >= TARGET - TOLERANCE && blob.size <= TARGET + TOLERANCE) {
+            bestBlob = blob;
+            bestW = w;
+            bestH = h;
+            addLog(`✅ Hit target range (~512B) at ${w}x${h}`, 'success');
             break;
           }
 
-          scale *= 0.85; // 15% reduction per step
-          await delay(40);
-        }
-
-        // Phase 2: Binary search quality for exact ~512 bytes
-        let qLow = 1, qHigh = 100;
-        let bestBlob = null;
-
-        while (qHigh - qLow > 1) {
-          const qMid = Math.floor((qLow + qHigh) / 2);
-          const blob = await canvasToBlob(img, finalW, finalH, qMid);
-          addLog(`[Q-Search] ${finalW}x${finalH} | Q:${qMid} | ${blob.size} bytes`);
-
-          if (blob.size <= TARGET) {
+          // Track closest if we overshoot or haven't hit target yet
+          if (!bestBlob || (blob.size < bestBlob.size && blob.size > TARGET + TOLERANCE)) {
             bestBlob = blob;
-            qLow = qMid; // Try higher quality while staying ≤512
-          } else {
-            qHigh = qMid; // Need lower quality to shrink further
+            bestW = w;
+            bestH = h;
           }
-          await delay(30);
+
+          await delay(50); // UI yield
         }
 
-        // Final selection: highest quality that stays ≤512
-        const finalBlob = bestBlob || await canvasToBlob(img, finalW, finalH, 50);
-        const finalQ = bestBlob ? qLow : 50;
-        const outputName = `${baseName}_exact512.jpg`;
+        // Fallback if never hit ~512
+        if (!bestBlob) {
+          addLog(`⚠️ Did not reach ~512 bytes. Best available: ${bestW}x${bestH} (${bestBlob.size} bytes)`, 'error');
+        }
 
-        addLog(`✅ Final: ${finalW}x${finalH} | Q:${finalQ} | ${finalBlob.size} bytes (Target: ~512)`, 'success');
-
-        const url = URL.createObjectURL(finalBlob);
+        // Output result
+        const url = URL.createObjectURL(bestBlob);
         finalPreview.src = url;
         resultSection.classList.remove('hidden');
         downloadLink.href = url;
-        downloadLink.download = outputName;
+        downloadLink.download = `${baseName}_optimized.jpg`;
       } catch (e) {
         addLog(`❌ Error: ${e.message}`, 'error');
         console.error(e);
@@ -235,12 +226,10 @@
         ctx.fillRect(0, 0, w, h);
         ctx.drawImage(img, 0, 0, w, h);
         
-        // Quality 1-100 maps to 0.01-1.0 for Canvas API
         const qNorm = Math.max(0.01, quality / 100);
-        
         canvas.toBlob((blob) => {
           if (blob) resolve(blob);
-          else reject(new Error('Canvas toBlob failed. Check browser compatibility.'));
+          else reject(new Error('Canvas toBlob failed.'));
         }, 'image/jpeg', qNorm);
       });
     }
