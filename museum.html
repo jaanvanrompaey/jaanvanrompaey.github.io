@@ -109,7 +109,6 @@
 
     const delay = ms => new Promise(r => setTimeout(r, ms));
 
-    // FIXED: Properly wraps toBlob in a Promise (requires callback as 1st argument)
     function canvasToBlob(canvas, mimeType = 'image/jpeg', quality = 0.85) {
       return new Promise((resolve, reject) => {
         canvas.toBlob((blob) => {
@@ -119,17 +118,13 @@
       });
     }
 
-    // Creates the exact "big color blocks" aesthetic you showed
     function renderBlockStyle(img, targetW, targetH) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       canvas.width = targetW;
       canvas.height = targetH;
-      
-      // Key to the blocky/pixelated look: disable smoothing (Nearest Neighbor)
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(img, 0, 0, targetW, targetH);
-      
       return canvas;
     }
 
@@ -164,45 +159,43 @@
       resultSection.classList.add('hidden');
       stepsBox.innerHTML = '';
 
+      // ✅ Matches Python script defaults & usage example exactly
       const options = {
         targetSizeBytes: 512,
+        qualityStep: 30,
         dimensionStep: 0.12,
         maxIterations: 20,
         stallThreshold: 50,
         maxStalls: 5,
-        MIN_DIM: 25 // STOP SCALING AT 25 PIXELS
+        MIN_DIM: 25
       };
 
       try {
         const img = await loadImage(file);
         const baseName = file.name.replace(/\.[^/.]+$/, "");
+        const origW = img.naturalWidth;
+        const origH = img.naturalHeight;
 
-        let currentW = img.naturalWidth;
-        let currentH = img.naturalHeight;
         let prevFileSize = 0;
         let stallCount = 0;
         let finalResult = null;
 
         for (let i = 1; i <= options.maxIterations; i++) {
-          let stepDesc = '';
-          let blob;
+          // ✅ LINEAR DIMENSION REDUCTION (Matches Python)
+          const reductionFactor = Math.max(0, 1 - (i * options.dimensionStep));
+          let currentW = Math.max(options.MIN_DIM, Math.floor(origW * reductionFactor));
+          let currentH = Math.max(options.MIN_DIM, Math.floor(origH * reductionFactor));
 
-          // 70% Dimension Reduction (Python logic)
-          currentW = Math.max(1, Math.floor(currentW * 0.3));
-          currentH = Math.max(1, Math.floor(currentH * 0.3));
+          // ✅ LINEAR QUALITY REDUCTION (Matches Python)
+          const currentQuality = Math.max(1, 100 - (i * options.qualityStep));
+          const qualityNorm = currentQuality / 100;
 
-          // 🔑 ENFORCE 25px FLOOR (Prevents going under 25x25)
-          currentW = Math.max(25, currentW);
-          currentH = Math.max(25, currentH);
-
-          const isAtFloor = (currentW <= 25 && currentH <= 25);
-
-          // Render using Block Style (Nearest Neighbor = Big Color Blocks)
+          // Render & Compress
           const blockCanvas = renderBlockStyle(img, currentW, currentH);
-          blob = await canvasToBlob(blockCanvas, 'image/jpeg', 0.85);
-          stepDesc = `${currentW}x${currentH}`;
+          const blob = await canvasToBlob(blockCanvas, 'image/jpeg', qualityNorm);
+          const fileSize = blob.size;
 
-          const fileSize = blob ? blob.size : 0;
+          // UI Step Rendering
           const stepDiv = document.createElement('div');
           stepDiv.className = 'step-row';
           
@@ -213,68 +206,29 @@
           
           const info = document.createElement('div');
           info.className = 'step-info';
-          const phase = isAtFloor ? 'QUALITY' : 'SCALE';
-          info.textContent = `[${i}] ${phase} | ${stepDesc} | ${fileSize} bytes`;
+          info.textContent = `[${i}] ${currentW}x${currentH} | Q:${currentQuality} | ${fileSize} bytes`;
           
           stepDiv.appendChild(thumb);
           stepDiv.appendChild(info);
           stepsBox.appendChild(stepDiv);
           stepsBox.scrollTop = stepsBox.scrollHeight;
 
-          await delay(150); // UI yield so steps render visibly
+          await delay(150); // UI yield for visible progression
 
+          // ✅ Success Check (Matches Python)
           if (fileSize <= options.targetSizeBytes) {
             info.classList.add('success');
-            info.textContent = `[${i}] ✅ Target Hit: ${stepDesc} | ${fileSize} bytes`;
+            info.textContent = `[${i}] ✅ Success! Final file: ${currentW}x${currentH} (${fileSize} bytes)`;
             finalResult = { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
             break;
           }
 
-          // Once dimensions hit 25px floor, switch to quality reduction
-          if (isAtFloor) {
-            const quality = Math.max(1, 85 - ((i - 5) * 15));
-            const qualityBlob = await canvasToBlob(blockCanvas, 'image/jpeg', quality / 100);
-            const qualitySize = qualityBlob.size;
-
-            const qualityStepDiv = document.createElement('div');
-            qualityStepDiv.className = 'step-row';
-            
-            const qThumbUrl = URL.createObjectURL(qualityBlob);
-            const qThumb = document.createElement('img');
-            qThumb.src = qThumbUrl;
-            qThumb.className = 'step-thumb';
-            
-            const qInfo = document.createElement('div');
-            qInfo.className = 'step-info';
-            qInfo.textContent = `[${i}] QUALITY | ${stepDesc} | Q:${quality} | ${qualitySize} bytes`;
-            
-            qualityStepDiv.appendChild(qThumb);
-            qualityStepDiv.appendChild(qInfo);
-            stepsBox.appendChild(qualityStepDiv);
-            stepsBox.scrollTop = stepsBox.scrollHeight;
-
-            await delay(150);
-
-            if (qualitySize <= options.targetSizeBytes) {
-              qInfo.classList.add('success');
-              qInfo.textContent = `[${i}] ✅ Target Hit: ${stepDesc} | Q:${quality} | ${qualitySize} bytes`;
-              finalResult = { blob: qualityBlob, name: `${baseName}_optimized.jpg`, size: qualitySize };
-              break;
-            }
-
-            if (quality <= 1) {
-              qInfo.classList.add('error');
-              qInfo.textContent = `[${i}] ❌ Could not reach ≤${options.targetSizeBytes} bytes.`;
-              stepsBox.appendChild(qInfo);
-              break;
-            }
-          }
-
+          // ✅ Stall Detection (Matches Python exactly)
           if (prevFileSize > 0 && Math.abs(fileSize - prevFileSize) < options.stallThreshold) {
             stallCount++;
             if (stallCount >= options.maxStalls) {
               info.classList.add('stalled');
-              info.textContent = `[${i}] ⏹️ Stalled at ${stepDesc} | ${fileSize} bytes`;
+              info.textContent = `[${i}] ⚠️ Linear optimization stalled. Returning best available: ${currentW}x${currentH}`;
               finalResult = finalResult || { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
               break;
             }
@@ -283,10 +237,14 @@
           }
           prevFileSize = fileSize;
 
+          // Track best result so far for fallback
           if (!finalResult || fileSize < finalResult.size) {
             finalResult = { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
           }
         }
+
+        // Clean up thumbnail URLs to prevent memory leaks
+        document.querySelectorAll('.step-thumb').forEach(thumb => URL.revokeObjectURL(thumb.src));
 
         if (finalResult) {
           const url = URL.createObjectURL(finalResult.blob);
@@ -297,7 +255,7 @@
         } else {
           const warning = document.createElement('div');
           warning.className = 'step-info error';
-          warning.textContent = `⚠️ Could not reach ≤${options.targetSizeBytes} bytes.`;
+          warning.textContent = `⚠️ Warning: Could not reach ≤${options.targetSizeBytes} bytes.`;
           stepsBox.appendChild(warning);
         }
       } catch (e) {
