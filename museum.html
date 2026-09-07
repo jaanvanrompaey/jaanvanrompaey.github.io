@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Block Pixelation Optimizer</title>
+  <title>Block Pixelation Optimizer (25px Floor)</title>
   <style>
     :root {
       --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --accent: #38bdf8;
@@ -68,7 +68,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>🎨 Block Pixelation Optimizer</h1>
+    <h1>🎨 Block Pixelation Optimizer (25px Floor)</h1>
     
     <label class="upload-area" for="fileInput">
       📁 Click to upload image (PNG, JPG, WebP, etc.)
@@ -126,7 +126,7 @@
       canvas.width = targetW;
       canvas.height = targetH;
       
-      // Key to the blocky/pixelated look: disable smoothing
+      // Key to the blocky/pixelated look: disable smoothing (Nearest Neighbor)
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(img, 0, 0, targetW, targetH);
       
@@ -169,7 +169,8 @@
         dimensionStep: 0.12,
         maxIterations: 20,
         stallThreshold: 50,
-        maxStalls: 5
+        maxStalls: 5,
+        MIN_DIM: 25 // STOP SCALING AT 25 PIXELS
       };
 
       try {
@@ -187,8 +188,14 @@
           let blob;
 
           // 70% Dimension Reduction (Python logic)
-          currentW = Math.max(1, Math.floor(currentW * 0.3));
-          currentH = Math.max(1, Math.floor(currentH * 0.3));
+          // BUT: Check if we are below the 25px floor
+          const isBelowFloor = (currentW <= options.MIN_DIM || currentH <= options.MIN_DIM);
+
+          if (!isBelowFloor) {
+            // Scale down by 70%
+            currentW = Math.max(1, Math.floor(currentW * 0.3));
+            currentH = Math.max(1, Math.floor(currentH * 0.3));
+          }
 
           // Render using Block Style (Nearest Neighbor = Big Color Blocks)
           const blockCanvas = renderBlockStyle(img, currentW, currentH);
@@ -206,7 +213,7 @@
           
           const info = document.createElement('div');
           info.className = 'step-info';
-          const phase = (currentW > 50 || currentH > 50) ? 'SCALE' : 'QUALITY';
+          const phase = isBelowFloor ? 'QUALITY' : 'SCALE';
           info.textContent = `[${i}] ${phase} | ${stepDesc} | ${fileSize} bytes`;
           
           stepDiv.appendChild(thumb);
@@ -223,9 +230,9 @@
             break;
           }
 
-          // Once dimensions hit 50px floor, we can't scale further.
+          // Once dimensions hit 25px floor, we can't scale further.
           // Switch to quality reduction to hit ~512 bytes.
-          if (currentW <= 50 || currentH <= 50) {
+          if (isBelowFloor) {
             const quality = Math.max(1, 85 - ((i - 5) * 15));
             const qualityBlob = await canvasToBlob(blockCanvas, 'image/jpeg', quality / 100);
             const qualitySize = qualityBlob.size;
