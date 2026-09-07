@@ -109,6 +109,24 @@
 
     const delay = ms => new Promise(r => setTimeout(r, ms));
 
+    // Simple color quantization to reduce color data without changing pixels
+    function quantizeCanvas(canvas, numColors) {
+      const ctx = canvas.getContext('2d');
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imgData.data;
+      
+      const bits = Math.max(1, Math.ceil(Math.log2(numColors)));
+      const step = 256 / Math.pow(2, bits);
+      
+      for (let i = 0; i < data.length; i += 4) {
+        data[i]     = Math.round(data[i] / step) * step;
+        data[i + 1] = Math.round(data[i + 1] / step) * step;
+        data[i + 2] = Math.round(data[i + 2] / step) * step;
+      }
+      ctx.putImageData(imgData, 0, 0);
+      return canvas;
+    }
+
     fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -131,25 +149,6 @@
       stepsBox.innerHTML = '';
     });
 
-    // Simple color quantization to reduce color data without changing pixels
-    function quantizeCanvas(canvas, numColors) {
-      const ctx = canvas.getContext('2d');
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imgData.data;
-      
-      // Calculate bits needed for target colors
-      const bits = Math.max(1, Math.ceil(Math.log2(numColors)));
-      const step = 256 / Math.pow(2, bits);
-      
-      for (let i = 0; i < data.length; i += 4) {
-        data[i]     = Math.round(data[i] / step) * step;       // R
-        data[i + 1] = Math.round(data[i + 1] / step) * step;   // G
-        data[i + 2] = Math.round(data[i + 2] / step) * step;   // B
-      }
-      ctx.putImageData(imgData, 0, 0);
-      return canvas;
-    }
-
     convertBtn.addEventListener('click', async () => {
       const file = fileInput.files[0];
       if (!file) return;
@@ -159,116 +158,135 @@
       resultSection.classList.add('hidden');
       stepsBox.innerHTML = '';
 
-      // EXACT PARAMETERS FROM YOUR PYTHON __main__
       const options = {
         targetSizeBytes: 512,
-        qualityStep: 30,
         dimensionStep: 0.12,
         maxIterations: 20,
         stallThreshold: 50,
         maxStalls: 5
       };
 
-      const img = await loadImage(file);
-      const baseName = file.name.replace(/\.[^/.]+$/, "");
-      const STOP_DIM = 50; // Stop scaling at 50x50
-      const COLOR_PALETTE_STEPS = [256, 128, 64, 32, 16, 8, 4, 2, 1]; // Colors to reduce
+      try {
+        const img = await loadImage(file);
+        const baseName = file.name.replace(/\.[^/.]+$/, "");
+        const STOP_DIM = 50;
+        const COLOR_PALETTE_STEPS = [256, 128, 64, 32, 16, 8, 4, 2, 1];
 
-      let currentW = img.naturalWidth;
-      let currentH = img.naturalHeight;
-      let scaleSteps = 0;
-      let colorStepIndex = 0;
-      let finalResult = null;
+        let currentW = img.naturalWidth;
+        let currentH = img.naturalHeight;
+        let colorStepIndex = 0;
+        let prevFileSize = 0;
+        let stallCount = 0;
+        let finalResult = null;
 
-      for (let i = 1; i <= options.maxIterations; i++) {
-        let stepDesc = '';
-        let blob;
+        for (let i = 1; i <= options.maxIterations; i++) {
+          let stepDesc = '';
+          let blob;
 
-        // Phase 1: Scale dimensions until 50x50
-        if (currentW > STOP_DIM || currentH > STOP_DIM) {
-          currentW = Math.max(1, Math.floor(currentW * (1 - options.dimensionStep)));
-          currentH = Math.max(1, Math.floor(currentH * (1 - options.dimensionStep)));
-          scaleSteps++;
-
-          const scaleCanvas = document.createElement('canvas');
-          scaleCanvas.width = currentW;
-          scaleCanvas.height = currentH;
-          scaleCanvas.getContext('2d').drawImage(img, 0, 0, currentW, currentH);
-          blob = await scaleCanvas.toBlob('image/jpeg', 0.85);
-          stepDesc = `${currentW}x${currentH}`;
-        } 
-        // Phase 2: Reduce color data (stop scaling pixels)
-        else {
-          if (colorStepIndex < COLOR_PALETTE_STEPS.length) {
-            const targetColors = COLOR_PALETTE_STEPS[colorStepIndex++];
-            const colorCanvas = document.createElement('canvas');
-            colorCanvas.width = STOP_DIM;
-            colorCanvas.height = STOP_DIM;
-            colorCanvas.getContext('2d').drawImage(img, 0, 0, STOP_DIM, STOP_DIM);
-            quantizeCanvas(colorCanvas, targetColors);
-            blob = await colorCanvas.toBlob('image/png');
-            stepDesc = `Colors: ${targetColors}`;
+          if (currentW > STOP_DIM || currentH > STOP_DIM) {
+            currentW = Math.max(1, Math.floor(currentW * (1 - options.dimensionStep)));
+            currentH = Math.max(1, Math.floor(currentH * (1 - options.dimensionStep)));
+            
+            const scaleCanvas = document.createElement('canvas');
+            scaleCanvas.width = currentW;
+            scaleCanvas.height = currentH;
+            scaleCanvas.getContext('2d').drawImage(img, 0, 0, currentW, currentH);
+            blob = await scaleCanvas.toBlob('image/jpeg', 0.85);
+            stepDesc = `${currentW}x${currentH}`;
           } else {
-            break; // Out of color steps
+            if (colorStepIndex < COLOR_PALETTE_STEPS.length) {
+              const targetColors = COLOR_PALETTE_STEPS[colorStepIndex++];
+              const colorCanvas = document.createElement('canvas');
+              colorCanvas.width = Math.max(1, currentW);
+              colorCanvas.height = Math.max(1, currentH);
+              colorCanvas.getContext('2d').drawImage(img, 0, 0, colorCanvas.width, colorCanvas.height);
+              quantizeCanvas(colorCanvas, targetColors);
+              blob = await colorCanvas.toBlob('image/png');
+              stepDesc = `Colors: ${targetColors}`;
+            } else {
+              break;
+            }
+          }
+
+          const fileSize = blob ? blob.size : 0;
+          const stepDiv = document.createElement('div');
+          stepDiv.className = 'step-row';
+          
+          const thumbUrl = URL.createObjectURL(blob);
+          const thumb = document.createElement('img');
+          thumb.src = thumbUrl;
+          thumb.className = 'step-thumb';
+          
+          const info = document.createElement('div');
+          info.className = 'step-info';
+          const phase = (currentW > STOP_DIM || currentH > STOP_DIM) ? 'SCALE' : 'COLOR';
+          info.textContent = `[${i}] Phase: ${phase} | ${stepDesc} | ${fileSize} bytes`;
+          
+          stepDiv.appendChild(thumb);
+          stepDiv.appendChild(info);
+          stepsBox.appendChild(stepDiv);
+          stepsBox.scrollTop = stepsBox.scrollHeight;
+
+          await delay(150);
+
+          if (fileSize <= options.targetSizeBytes) {
+            info.classList.add('success');
+            info.textContent = `[${i}] ✅ Target Hit: ${stepDesc} | ${fileSize} bytes`;
+            finalResult = { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
+            break;
+          }
+
+          if (prevFileSize > 0 && Math.abs(fileSize - prevFileSize) < options.stallThreshold) {
+            stallCount++;
+            if (stallCount >= options.maxStalls) {
+              info.classList.add('stalled');
+              info.textContent = `[${i}] ⏹️ Stalled at ${stepDesc} | ${fileSize} bytes`;
+              finalResult = finalResult || { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
+              break;
+            }
+          } else {
+            stallCount = 0;
+          }
+          prevFileSize = fileSize;
+
+          if (!finalResult || fileSize < finalResult.size) {
+            finalResult = { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
           }
         }
 
-        const fileSize = blob.size;
-        const stepDiv = document.createElement('div');
-        stepDiv.className = 'step-row';
-        
-        const thumbUrl = URL.createObjectURL(blob);
-        const thumb = document.createElement('img');
-        thumb.src = thumbUrl;
-        thumb.className = 'step-thumb';
-        
-        const info = document.createElement('div');
-        info.className = 'step-info';
-        info.textContent = `[${i}] Phase: ${currentW > STOP_DIM || currentH > STOP_DIM ? 'SCALE' : 'COLOR'} | ${stepDesc} | ${fileSize} bytes`;
-        
-        stepDiv.appendChild(thumb);
-        stepDiv.appendChild(info);
-        stepsBox.appendChild(stepDiv);
-        stepsBox.scrollTop = stepsBox.scrollHeight;
-
-        await delay(150); // UI yield
-
-        if (fileSize <= options.targetSizeBytes) {
-          info.classList.add('success');
-          info.textContent = `[${i}] ✅ Target Hit: ${stepDesc} | ${fileSize} bytes`;
-          finalResult = { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
-          break;
+        if (finalResult) {
+          const url = URL.createObjectURL(finalResult.blob);
+          finalPreview.src = url;
+          resultSection.classList.remove('hidden');
+          downloadLink.href = url;
+          downloadLink.download = finalResult.name;
+        } else {
+          const warning = document.createElement('div');
+          warning.className = 'step-info error';
+          warning.textContent = `⚠️ Could not reach ≤${options.targetSizeBytes} bytes.`;
+          stepsBox.appendChild(warning);
         }
-
-        if (Math.abs(fileSize - (i === 1 ? 0 : stepsBox.lastChild?.querySelector('.step-info')?.textContent.match(/\d+ bytes/)?.[0]?.replace(/\D/g, '') || 0)) < options.stallThreshold) {
-          // Simple stall detection based on recent steps
-        }
-
-        // Keep track of closest valid result
-        if (!finalResult || (fileSize < finalResult.size && fileSize > options.targetSizeBytes)) {
-          finalResult = { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
-        }
+      } catch (e) {
+        console.error(e);
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'step-info error';
+        errorDiv.textContent = `❌ Error: ${e.message}`;
+        stepsBox.appendChild(errorDiv);
+      } finally {
+        convertBtn.disabled = false;
       }
-
-      if (finalResult) {
-        const url = URL.createObjectURL(finalResult.blob);
-        finalPreview.src = url;
-        resultSection.classList.remove('hidden');
-        downloadLink.href = url;
-        downloadLink.download = finalResult.name;
-      } else {
-        const warning = document.createElement('div');
-        warning.className = 'step-info error';
-        warning.textContent = `⚠️ Could not reach ≤${options.targetSizeBytes} bytes.`;
-        stepsBox.appendChild(warning);
-      }
-      convertBtn.disabled = false;
     });
 
     function loadImage(file) {
       return new Promise((resolve, reject) => {
         const img = new Image();
-        img.onload = () => resolve(img);
+        img.onload = () => {
+          if (img.naturalWidth === 0 || img.naturalHeight === 0) {
+            reject(new Error('Invalid or unsupported image file.'));
+          } else {
+            resolve(img);
+          }
+        };
         img.onerror = () => reject(new Error('Failed to load image. Try a different file format.'));
         img.src = URL.createObjectURL(file);
       });
