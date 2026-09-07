@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>70% Step Image Optimizer</title>
+  <title>Linear Image Optimizer (Python Replica)</title>
   <style>
     :root {
       --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --accent: #38bdf8;
@@ -17,7 +17,7 @@
     }
     .container {
       background: var(--card); padding: 2rem; border-radius: 12px;
-      border: 1px solid var(--border); width: 100%; max-width: 550px;
+      border: 1px solid var(--border); width: 100%; max-width: 650px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.4);
     }
     h1 { margin: 0 0 1.5rem; text-align: center; font-size: 1.4rem; }
@@ -44,23 +44,30 @@
     .preview-img.large { max-height: 450px; border: 2px solid var(--success); }
     .meta { font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.5rem; }
 
-    .log-section { margin-top: 1.5rem; }
-    .log-box {
-      background: #0b1120; color: #94a3b8; font-family: monospace;
-      padding: 1rem; border-radius: 6px; max-height: 280px; overflow-y: auto;
-      font-size: 0.85rem; line-height: 1.4; border: 1px solid var(--border);
+    .steps-section { margin-top: 1.5rem; }
+    .steps-box {
+      background: #0b1120; border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem; max-height: 350px; overflow-y: auto;
     }
-    .log-box div { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .log-box div.success { color: var(--success); font-weight: bold; }
-    .log-box div.stalled { color: var(--warn); }
-    .log-box div.error { color: var(--error); }
+    .step-row {
+      display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+      align-items: center;
+    }
+    .step-thumb {
+      width: 60px; height: auto; border-radius: 4px; background: #000;
+      object-fit: contain; flex-shrink: 0;
+    }
+    .step-info { font-family: monospace; font-size: 0.85rem; line-height: 1.4; }
+    .step-info.success { color: var(--success); font-weight: bold; }
+    .step-info.stalled { color: var(--warn); }
+    .step-info.error { color: var(--error); }
 
     .result-section { margin-top: 1.5rem; text-align: center; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🎯 70% Step Image Optimizer</h1>
+    <h1>🖼️ Linear Image Optimizer (Python Replica)</h1>
     
     <label class="upload-area" for="fileInput">
       📁 Click to upload image (PNG, JPG, WebP, etc.)
@@ -70,8 +77,184 @@
     <div id="previewSection" class="preview-section hidden">
       <p class="meta" id="originalInfo"></p>
       <img id="originalPreview" class="preview-img" alt="Original Preview">
-      <button id="convertBtn" class="btn">🔄 Convert (70% Step)</button>
+      <button id="convertBtn" class="btn">🔄 Convert & Show Steps</button>
     </div>
+
+    <div id="stepsSection" class="steps-section hidden">
+      <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">📜 Optimization Steps</h3>
+      <div id="stepsBox" class="steps-box"></div>
+    </div>
+
+    <div id="resultSection" class="result-section hidden">
+      <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">✅ Final Optimized Image</h3>
+      <img id="finalPreview" class="preview-img large" alt="Final Preview">
+      <a id="downloadLink" class="btn">⬇️ Download Final Image</a>
+      <button id="resetBtn" class="btn" style="background: var(--border); color: var(--text); margin-left: 10px;">🔄 Reset</button>
+    </div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const previewSection = document.getElementById('previewSection');
+    const originalPreview = document.getElementById('originalPreview');
+    const originalInfo = document.getElementById('originalInfo');
+    const convertBtn = document.getElementById('convertBtn');
+    const stepsSection = document.getElementById('stepsSection');
+    const stepsBox = document.getElementById('stepsBox');
+    const resultSection = document.getElementById('resultSection');
+    const finalPreview = document.getElementById('finalPreview');
+    const downloadLink = document.getElementById('downloadLink');
+    const resetBtn = document.getElementById('resetBtn');
+
+    const delay = ms => new Promise(r => setTimeout(r, ms));
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const url = URL.createObjectURL(file);
+      originalPreview.src = url;
+      originalInfo.textContent = `${file.name} | ${(file.size/1024).toFixed(2)} KB | ${file.type.split('/')[1].toUpperCase()}`;
+      
+      previewSection.classList.remove('hidden');
+      stepsSection.classList.add('hidden');
+      resultSection.classList.add('hidden');
+      convertBtn.disabled = false;
+    });
+
+    resetBtn.addEventListener('click', () => {
+      fileInput.value = '';
+      previewSection.classList.add('hidden');
+      stepsSection.classList.add('hidden');
+      resultSection.classList.add('hidden');
+      stepsBox.innerHTML = '';
+    });
+
+    convertBtn.addEventListener('click', async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      
+      convertBtn.disabled = true;
+      stepsSection.classList.remove('hidden');
+      resultSection.classList.add('hidden');
+      stepsBox.innerHTML = '';
+
+      // EXACT PARAMETERS FROM YOUR PYTHON __main__
+      const options = {
+        targetSizeBytes: 512,
+        qualityStep: 30,
+        dimensionStep: 0.12,
+        maxIterations: 20,
+        stallThreshold: 50,
+        maxStalls: 5
+      };
+
+      const img = await loadImage(file);
+      const baseName = file.name.replace(/\.[^/.]+$/, "");
+      const outExt = '.jpg';
+
+      let prevFileSize = Infinity;
+      let stallCount = 0;
+      let finalResult = null;
+
+      for (let i = 1; i <= options.maxIterations; i++) {
+        const reductionFactor = Math.max(0.0, 1.0 - (i * options.dimensionStep));
+        const newW = Math.max(1, Math.floor(img.width * reductionFactor));
+        const newH = Math.max(1, Math.floor(img.height * reductionFactor));
+        const currentQuality = Math.max(1, 100 - (i * options.qualityStep));
+
+        const outputName = `${baseName}_v${i}${outExt}`;
+        const blob = await canvasToBlob(img, newW, newH, currentQuality);
+        const fileSize = blob.size;
+
+        // Create visual step
+        const stepDiv = document.createElement('div');
+        stepDiv.className = 'step-row';
+        
+        const thumbUrl = URL.createObjectURL(blob);
+        const thumb = document.createElement('img');
+        thumb.src = thumbUrl;
+        thumb.className = 'step-thumb';
+        
+        const info = document.createElement('div');
+        info.className = 'step-info';
+        info.textContent = `[${i}] ${newW}x${newH} | Q:${currentQuality} | ${fileSize} bytes`;
+        
+        stepDiv.appendChild(thumb);
+        stepDiv.appendChild(info);
+        stepsBox.appendChild(stepDiv);
+        stepsBox.scrollTop = stepsBox.scrollHeight;
+
+        // Yield to UI so steps render visibly
+        await delay(150);
+
+        if (fileSize <= options.targetSizeBytes) {
+          info.classList.add('success');
+          info.textContent = `[${i}] ${newW}x${newH} | Q:${currentQuality} | ${fileSize} bytes`;
+          finalResult = { blob, name: outputName, size: fileSize };
+          break;
+        }
+
+        if (Math.abs(fileSize - prevFileSize) < options.stallThreshold) {
+          stallCount++;
+          if (stallCount >= options.maxStalls) {
+            info.classList.add('stalled');
+            info.textContent = `[${i}] ${newW}x${newH} | Q:${currentQuality} | ${fileSize} bytes | STALLED`;
+            finalResult = { blob, name: outputName, size: fileSize };
+            break;
+          }
+        } else {
+          stallCount = 0;
+        }
+        prevFileSize = fileSize;
+      }
+
+      if (finalResult) {
+        const url = URL.createObjectURL(finalResult.blob);
+        finalPreview.src = url;
+        resultSection.classList.remove('hidden');
+        downloadLink.href = url;
+        downloadLink.download = finalResult.name;
+      } else {
+        const warning = document.createElement('div');
+        warning.className = 'step-info error';
+        warning.textContent = `⚠️ Warning: Could not reach ≤${options.targetSizeBytes} bytes.`;
+        stepsBox.appendChild(warning);
+      }
+      convertBtn.disabled = false;
+    });
+
+    function loadImage(file) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('Failed to load image. Try a different file format.'));
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    function canvasToBlob(img, w, h, quality) {
+      return new Promise((resolve, reject) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        
+        ctx.imageSmoothingQuality = 'high';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        
+        const qNorm = Math.max(0.01, quality / 100);
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error(`toBlob failed at ${w}x${h} Q:${quality}`));
+        }, 'image/jpeg', qNorm);
+      });
+    }
+  </script>
+</body>
+</html>
 
     <div id="logSection" class="log-section hidden">
       <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">📜 Optimization Steps</h3>
