@@ -17,18 +17,12 @@
     }
 
     body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       font-family: var(--font-main);
-      background: var(--color-bg);
-      color: var(--color-text);
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      background: var(--color-bg); color: var(--color-text);
+      height: 100vh; display: flex; flex-direction: column; overflow: hidden;
     }
 
-    /* Header */
     header {
       padding: var(--spacing);
       border-bottom: var(--border-width) solid var(--border-color);
@@ -36,105 +30,73 @@
     }
 
     h1 {
-      margin: 0;
-      font-size: 1.5rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-weight: 800;
+      margin: 0; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 800;
     }
 
-    /* Main Layout */
     main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
+      flex: 1; display: grid;
+      grid-template-columns: 1fr 280px;
+      grid-template-rows: 1fr 1fr;
+      gap: var(--spacing);
       padding: var(--spacing);
-      overflow-y: auto; /* Allow scroll if too many steps */
+      box-sizing: border-box;
     }
 
     /* Upload State */
     #uploadState {
-      display: flex;
-      flex: 1;
-      justify-content: flex-end;
-      align-items: flex-end;
+      display: flex; flex: 1; justify-content: flex-end; align-items: flex-end;
     }
 
     .museum-btn {
-      background: transparent;
-      border: var(--border-width) solid var(--border-color);
-      padding: 15px 30px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
+      background: transparent; border: var(--border-width) solid var(--border-color);
+      padding: 15px 30px; font-size: 1.2rem; font-weight: bold;
+      text-transform: uppercase; cursor: pointer; transition: background 0.2s, color 0.2s;
+    }
+    .museum-btn:hover { background: var(--color-text); color: var(--color-bg); }
+
+    /* Gallery State */
+    #galleryState { display: none; }
+
+    .top-row {
+      grid-column: 1; grid-row: 1;
+      display: flex; gap: var(--spacing); flex-wrap: wrap;
     }
 
-    .museum-btn:hover {
-      background: var(--color-text);
-      color: var(--color-bg);
-    }
-
-    /* Gallery / Steps Grid */
-    #galleryState {
-      display: none;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    /* The Dynamic Grid */
-    .steps-grid {
-      display: grid;
-      /* Auto-fill columns, but keep them roughly equal size */
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
-      gap: var(--spacing);
-      height: 100%;
-    }
-
-    /* Individual Block (Step or Final) */
     .step-slot {
+      flex: 1 1 0; aspect-ratio: 1 / 1;
       border: var(--border-width) solid var(--border-color);
-      aspect-ratio: 1 / 1; /* Keeps them square */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: var(--gray-placeholder);
-      position: relative;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: var(--gray-placeholder); position: relative;
     }
-
     .step-slot img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: none;
+      width: 100%; height: 100%; object-fit: contain; display: none;
     }
-
-    .step-slot.loaded img {
-      display: block;
-    }
+    .step-slot.loaded img { display: block; }
 
     .step-label {
-      margin-top: 5px;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      text-align: center;
-      line-height: 1.2;
+      margin-top: 5px; font-size: 0.7rem; text-transform: uppercase;
+      text-align: center; line-height: 1.2;
     }
 
-    /* Submit Button Overlay (Bottom Right) */
-    #submitArea {
-      position: fixed;
-      bottom: var(--spacing);
-      right: var(--spacing);
-      z-index: 10;
+    /* Final Area (Bottom Left) */
+    .final-area {
+      grid-column: 1; grid-row: 2; aspect-ratio: 1 / 1;
+      border: var(--border-width) solid var(--border-color);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: var(--gray-placeholder);
+    }
+    .final-area img {
+      width: 100%; height: 100%; object-fit: contain; display: none;
+    }
+    .final-area.loaded img { display: block; }
+
+    /* Submit Area (Bottom Right) */
+    .submit-area {
+      grid-column: 2; grid-row: 2;
+      display: flex; align-items: flex-end;
     }
 
-    /* Hidden Input */
-    #fileInput {
-      display: none;
-    }
+    #fileInput { display: none; }
   </style>
 </head>
 <body>
@@ -146,34 +108,33 @@
   <main>
     <!-- 1. Initial Upload State -->
     <div id="uploadState">
-      <label for="fileInput" class="museum-btn">
-        UPLOAD IMAGE
-      </label>
+      <label for="fileInput" class="museum-btn">UPLOAD IMAGE</label>
       <input type="file" id="fileInput" accept="image/*">
     </div>
 
     <!-- 2. Processing / Gallery State -->
     <div id="galleryState">
-      <!-- Dynamic Grid Container -->
-      <div class="steps-grid" id="stepsGrid">
-        <!-- Slots generated by JS -->
+      <div id="topRow" class="top-row"></div>
+      
+      <div id="finalArea" class="final-area">
+        <img id="finalImage" alt="Final Result">
+        <div id="finalLabel" class="step-label">FINAL STEP: --- BYTES</div>
+      </div>
+
+      <div id="submitArea" class="submit-area">
+        <button class="museum-btn" onclick="alert('Work submitted to the museum archive.')">SUBMIT WORK</button>
       </div>
     </div>
   </main>
-
-  <!-- Submit Button (Always visible once processing starts) -->
-  <div id="submitArea" style="display: none;">
-    <button class="museum-btn" onclick="alert('Work submitted to the museum archive.')">
-      SUBMIT WORK
-    </button>
-  </div>
 
   <script>
     const fileInput = document.getElementById('fileInput');
     const uploadState = document.getElementById('uploadState');
     const galleryState = document.getElementById('galleryState');
-    const stepsGrid = document.getElementById('stepsGrid');
-    const submitArea = document.getElementById('submitArea');
+    const topRow = document.getElementById('topRow');
+    const finalArea = document.getElementById('finalArea');
+    const finalImage = document.getElementById('finalImage');
+    const finalLabel = document.getElementById('finalLabel');
 
     fileInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
@@ -182,10 +143,11 @@
       // UI Transition
       uploadState.style.display = 'none';
       galleryState.style.display = 'flex';
-      submitArea.style.display = 'block';
       
       // Clear previous results
-      stepsGrid.innerHTML = '';
+      topRow.innerHTML = '';
+      finalImage.src = '';
+      finalArea.classList.remove('loaded');
 
       try {
         const img = await loadImage(file);
@@ -193,7 +155,7 @@
         const origW = img.naturalWidth;
         const origH = img.naturalHeight;
 
-        // Options: Allow up to 15 steps to be safe, but usually hits target sooner
+        // Options: Tuned for 4-6 steps, but dynamically handles any amount
         const options = {
           targetSizeBytes: 512,
           qualityStep: 20,
@@ -206,36 +168,28 @@
         let prevFileSize = 0;
         let finalResult = null;
 
-        // Dynamic Loop: Generates as many blocks as needed
+        // Dynamic Loop: Creates exactly as many blocks as needed
         for (let i = 1; i <= options.maxIterations; i++) {
           
           // Create a new DOM Slot for this step
           const slot = document.createElement('div');
           slot.className = 'step-slot';
-          
           const slotImg = document.createElement('img');
-          slotImg.alt = `Step ${i}`;
-          
           const slotLabel = document.createElement('div');
           slotLabel.className = 'step-label';
-          slotLabel.innerText = `STEP ${i}: --- BYTES`;
           
           slot.appendChild(slotImg);
           slot.appendChild(slotLabel);
-          stepsGrid.appendChild(slot);
+          topRow.appendChild(slot);
 
-          // --- OPTIMIZATION LOGIC ---
-          
-          // Linear Dimension Reduction
+          // --- OPTIMIZATION LOGIC (Matches Python exactly) ---
           const reductionFactor = Math.max(0, 1 - (i * options.dimensionStep));
           let currentW = Math.max(options.MIN_DIM, Math.floor(origW * reductionFactor));
           let currentH = Math.max(options.MIN_DIM, Math.floor(origH * reductionFactor));
 
-          // Linear Quality Reduction
           const currentQuality = Math.max(1, 100 - (i * options.qualityStep));
           const qualityNorm = currentQuality / 100;
 
-          // Render (Heavy Block Algorithm)
           const blockCanvas = renderBlockStyle(img, currentW, currentH, options.blockSize);
           const blob = await canvasToBlob(blockCanvas, 'image/jpeg', qualityNorm);
           const fileSize = blob.size;
@@ -248,46 +202,42 @@
           // Success Check
           if (fileSize <= options.targetSizeBytes) {
             finalResult = { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
-            break; // Stop processing, we found the target
+            // Place final result in bottom left
+            finalImage.src = URL.createObjectURL(blob);
+            finalLabel.innerText = `FINAL STEP: ${finalResult.size} BYTES`;
+            finalArea.classList.add('loaded');
+            break;
           }
 
-          // Stall Detection (Optional safety break)
+          // Stall Detection
           if (prevFileSize > 0 && Math.abs(fileSize - prevFileSize) < 50) {
              finalResult = finalResult || { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
+             finalImage.src = URL.createObjectURL(finalResult.blob);
+             finalLabel.innerText = `FINAL STEP: ${finalResult.size} BYTES (Stalled)`;
+             finalArea.classList.add('loaded');
              break;
           }
           
-          // Track best result just in case
           if (!finalResult || fileSize < finalResult.size) {
             finalResult = { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
           }
 
           prevFileSize = fileSize;
-          
-          // Delay for "one by one" reveal
           await new Promise(r => setTimeout(r, 800)); 
         }
 
-        // Label the final block (if not already labeled by success check)
-        if (finalResult) {
-           // Find the last slot we created
-           const lastSlot = stepsGrid.lastElementChild;
-           if(lastSlot) {
-             const lastLabel = lastSlot.querySelector('.step-label');
-             lastLabel.innerText = `FINAL STEP: ${finalResult.size} BYTES`;
-           }
+        // Fallback if loop finishes without hitting target
+        if (!finalResult) {
+          finalLabel.innerText = "ERROR: Could not reach target.";
         }
 
       } catch (e) {
         alert("Error: " + e.message);
-        // Reset to upload state
         uploadState.style.display = 'flex';
         galleryState.style.display = 'none';
-        submitArea.style.display = 'none';
       }
     });
 
-    // Helper: Canvas to Blob
     function canvasToBlob(canvas, mimeType = 'image/jpeg', quality = 0.85) {
       return new Promise((resolve, reject) => {
         canvas.toBlob((blob) => {
@@ -297,16 +247,12 @@
       });
     }
 
-    // Helper: Heavy Block Rendering (Nearest Neighbor)
     function renderBlockStyle(img, targetW, targetH, blockSize = 8) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      
-      // Calculate grid size based on block size
       const gridW = Math.max(1, Math.ceil(targetW / blockSize));
       const gridH = Math.max(1, Math.ceil(targetH / blockSize));
 
-      // Render to small intermediate canvas
       const offCanvas = document.createElement('canvas');
       offCanvas.width = gridW;
       offCanvas.height = gridH;
@@ -314,7 +260,6 @@
       offCtx.imageSmoothingEnabled = false;
       offCtx.drawImage(img, 0, 0, gridW, gridH);
 
-      // Scale back up (Nearest Neighbor = Blocky Look)
       canvas.width = targetW;
       canvas.height = targetH;
       ctx.imageSmoothingEnabled = false;
@@ -322,7 +267,6 @@
       return canvas;
     }
 
-    // Helper: Load Image
     function loadImage(file) {
       return new Promise((resolve, reject) => {
         const img = new Image();
