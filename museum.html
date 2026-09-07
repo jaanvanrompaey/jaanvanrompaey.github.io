@@ -134,9 +134,9 @@
         const img = await loadImage(file);
         const baseName = file.name.replace(/\.[^/.]+$/, "");
         const TARGET = 512;
-        const TOLERANCE = 100; // ±100 bytes for "around 512"
+        const TOLERANCE = 100;
         const MIN_DIM = 100;
-        const SCALE_FACTOR = 0.3; // 70% reduction per step
+        const SCALE_FACTOR = 0.3; // 70% reduction
         const MAX_STEPS = 15;
 
         addLog(`📥 Processing: ${img.naturalWidth}x${img.naturalHeight}`);
@@ -145,7 +145,6 @@
         let bestBlob = null;
         let bestW = img.naturalWidth;
         let bestH = img.naturalHeight;
-        let hitFloor = false;
 
         for (let i = 1; i <= MAX_STEPS; i++) {
           // 70% dimension reduction
@@ -159,46 +158,63 @@
             const adjust = MIN_DIM / minDim;
             w = Math.floor(w * adjust);
             h = Math.floor(h * adjust);
-            hitFloor = true;
           }
 
-          // Generate blob (constant Q:85 during scaling)
-          const quality = hitFloor ? Math.max(1, 85 - ((i - 2) * 12)) : 85;
-          const blob = await canvasToBlob(img, w, h, quality);
-          addLog(`[Step ${i}] ${w}x${h} | Q:${quality} | ${blob.size} bytes`);
+          let quality = 85;
+          try {
+            const blob = await canvasToBlob(img, w, h, quality);
+            addLog(`[Step ${i}] ${w}x${h} | Q:${quality} | ${blob.size} bytes`);
 
-          // Check if around 512 (±100 bytes)
-          if (blob.size >= TARGET - TOLERANCE && blob.size <= TARGET + TOLERANCE) {
-            bestBlob = blob;
-            bestW = w;
-            bestH = h;
-            addLog(`✅ Hit target range (~512B) at ${w}x${h}`, 'success');
-            break;
-          }
+            // Check if around 512 (±100 bytes)
+            if (blob.size >= TARGET - TOLERANCE && blob.size <= TARGET + TOLERANCE) {
+              bestBlob = blob;
+              bestW = w;
+              bestH = h;
+              addLog(`✅ Hit target range (~512B) at ${w}x${h}`, 'success');
+              break;
+            }
 
-          // Track closest if we overshoot or haven't hit target yet
-          if (!bestBlob || (blob.size < bestBlob.size && blob.size > TARGET + TOLERANCE)) {
-            bestBlob = blob;
-            bestW = w;
-            bestH = h;
+            // Track closest if we overshoot or haven't hit target yet
+            if (!bestBlob || (blob.size < bestBlob.size && blob.size > TARGET + TOLERANCE)) {
+              bestBlob = blob;
+              bestW = w;
+              bestH = h;
+            }
+          } catch (blobErr) {
+            // Graceful fallback: reduce dimensions by 50% and retry once
+            addLog(`⚠️ Blob failed at ${w}x${h}. Reducing dimensions and retrying...`, 'error');
+            w = Math.max(MIN_DIM, Math.floor(w * 0.5));
+            h = Math.max(MIN_DIM, Math.floor(h * 0.5));
+            
+            const retryBlob = await canvasToBlob(img, w, h, quality);
+            addLog(`[Retry] ${w}x${h} | Q:${quality} | ${retryBlob.size} bytes`);
+            
+            if (retryBlob.size >= TARGET - TOLERANCE && retryBlob.size <= TARGET + TOLERANCE) {
+              bestBlob = retryBlob;
+              bestW = w;
+              bestH = h;
+              addLog(`✅ Hit target range (~512B) at ${w}x${h}`, 'success');
+              break;
+            }
+            
+            if (!bestBlob || (retryBlob.size < bestBlob.size && retryBlob.size > TARGET + TOLERANCE)) {
+              bestBlob = retryBlob;
+              bestW = w;
+              bestH = h;
+            }
           }
 
           await delay(50); // UI yield
         }
 
-        // Fallback if never hit ~512
-        if (!bestBlob) {
-          addLog(`⚠️ Did not reach ~512 bytes. Best available: ${bestW}x${bestH} (${bestBlob.size} bytes)`, 'error');
-        }
-
-        // Output result
+        // Final output
         const url = URL.createObjectURL(bestBlob);
         finalPreview.src = url;
         resultSection.classList.remove('hidden');
         downloadLink.href = url;
         downloadLink.download = `${baseName}_optimized.jpg`;
       } catch (e) {
-        addLog(`❌ Error: ${e.message}`, 'error');
+        addLog(`❌ Critical Error: ${e.message}`, 'error');
         console.error(e);
       } finally {
         convertBtn.disabled = false;
@@ -220,16 +236,24 @@
         canvas.width = w;
         canvas.height = h;
         const ctx = canvas.getContext('2d');
-        
+
+        // Browser canvas limits (Chrome/Firefox/Safari)
+        const MAX_SIZE = 16384;
+        const MAX_PIXELS = 268435456; // ~268MP
+        if (w > MAX_SIZE || h > MAX_SIZE || (w * h) > MAX_PIXELS) {
+          return reject(new Error(`Canvas exceeds browser limits (${w}x${h}).`));
+        }
+
         ctx.imageSmoothingQuality = 'high';
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, w, h);
         ctx.drawImage(img, 0, 0, w, h);
-        
-        const qNorm = Math.max(0.01, quality / 100);
+
+        const qNorm = Math.max(0.01, Math.min(1, quality / 100));
+
         canvas.toBlob((blob) => {
           if (blob) resolve(blob);
-          else reject(new Error('Canvas toBlob failed.'));
+          else reject(new Error(`toBlob failed at ${w}x${h} Q:${quality}`));
         }, 'image/jpeg', qNorm);
       });
     }
