@@ -368,9 +368,7 @@
         canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality / 100);
       });
     }
-  </script>
-</body>
-</html>
+
     function updateStatus(msg, size = null) {
       statusEl.textContent = msg + (size !== null ? ` | ${size} bytes` : '');
     }
