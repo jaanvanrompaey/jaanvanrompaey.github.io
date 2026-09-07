@@ -94,7 +94,7 @@
     </div>
   </div>
 
-  <script>
+    <script>
     const fileInput = document.getElementById('fileInput');
     const previewSection = document.getElementById('previewSection');
     const originalPreview = document.getElementById('originalPreview');
@@ -175,16 +175,16 @@
       resultSection.classList.add('hidden');
       stepsBox.innerHTML = '';
 
-      // ✅ Updated options with heavier blocking
+      // ✅ TUNED FOR 4-6 STEPS (Matches Python linear logic)
       const options = {
         targetSizeBytes: 512,
-        qualityStep: 30,
-        dimensionStep: 0.12,
-        maxIterations: 20,
+        qualityStep: 20,          // Drops 20 quality points per step (100 → 80 → 60 → 40 → 20 → 1)
+        dimensionStep: 0.2,       // Reduces dimensions by 20% of original per step
+        maxIterations: 6,         // Caps the loop at 6 steps
         stallThreshold: 50,
         maxStalls: 5,
         MIN_DIM: 25,
-        blockSize: 8 // ⬅️ Higher = heavier/more aggressive color blocking (8, 16, 32)
+        blockSize: 8
       };
 
       try {
@@ -301,6 +301,7 @@
       });
     }
   </script>
+
 
 </body>
 </html>
