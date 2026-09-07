@@ -188,14 +188,14 @@
           let blob;
 
           // 70% Dimension Reduction (Python logic)
-          // BUT: Check if we are below the 25px floor
-          const isBelowFloor = (currentW <= options.MIN_DIM || currentH <= options.MIN_DIM);
+          currentW = Math.max(1, Math.floor(currentW * 0.3));
+          currentH = Math.max(1, Math.floor(currentH * 0.3));
 
-          if (!isBelowFloor) {
-            // Scale down by 70%
-            currentW = Math.max(1, Math.floor(currentW * 0.3));
-            currentH = Math.max(1, Math.floor(currentH * 0.3));
-          }
+          // 🔑 ENFORCE 25px FLOOR (Prevents going under 25x25)
+          currentW = Math.max(25, currentW);
+          currentH = Math.max(25, currentH);
+
+          const isAtFloor = (currentW <= 25 && currentH <= 25);
 
           // Render using Block Style (Nearest Neighbor = Big Color Blocks)
           const blockCanvas = renderBlockStyle(img, currentW, currentH);
@@ -213,7 +213,7 @@
           
           const info = document.createElement('div');
           info.className = 'step-info';
-          const phase = isBelowFloor ? 'QUALITY' : 'SCALE';
+          const phase = isAtFloor ? 'QUALITY' : 'SCALE';
           info.textContent = `[${i}] ${phase} | ${stepDesc} | ${fileSize} bytes`;
           
           stepDiv.appendChild(thumb);
@@ -230,9 +230,8 @@
             break;
           }
 
-          // Once dimensions hit 25px floor, we can't scale further.
-          // Switch to quality reduction to hit ~512 bytes.
-          if (isBelowFloor) {
+          // Once dimensions hit 25px floor, switch to quality reduction
+          if (isAtFloor) {
             const quality = Math.max(1, 85 - ((i - 5) * 15));
             const qualityBlob = await canvasToBlob(blockCanvas, 'image/jpeg', quality / 100);
             const qualitySize = qualityBlob.size;
