@@ -109,6 +109,13 @@
 
     const delay = ms => new Promise(r => setTimeout(r, ms));
 
+    // FIXED: Properly wraps toBlob in a Promise (requires callback as 1st argument)
+    function canvasToBlob(canvas, mimeType = 'image/jpeg', quality = 0.85) {
+      return new Promise(resolve => {
+        canvas.toBlob(resolve, mimeType, quality);
+      });
+    }
+
     // Simple color quantization to reduce color data without changing pixels
     function quantizeCanvas(canvas, numColors) {
       const ctx = canvas.getContext('2d');
@@ -191,7 +198,7 @@
             scaleCanvas.width = currentW;
             scaleCanvas.height = currentH;
             scaleCanvas.getContext('2d').drawImage(img, 0, 0, currentW, currentH);
-            blob = await scaleCanvas.toBlob('image/jpeg', 0.85);
+            blob = await canvasToBlob(scaleCanvas, 'image/jpeg', 0.85); // FIXED
             stepDesc = `${currentW}x${currentH}`;
           } else {
             if (colorStepIndex < COLOR_PALETTE_STEPS.length) {
@@ -201,7 +208,7 @@
               colorCanvas.height = Math.max(1, currentH);
               colorCanvas.getContext('2d').drawImage(img, 0, 0, colorCanvas.width, colorCanvas.height);
               quantizeCanvas(colorCanvas, targetColors);
-              blob = await colorCanvas.toBlob('image/png');
+              blob = await canvasToBlob(colorCanvas, 'image/png'); // FIXED
               stepDesc = `Colors: ${targetColors}`;
             } else {
               break;
