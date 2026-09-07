@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Linear Image Optimizer</title>
+  <title>Auto Linear Image Optimizer</title>
   <style>
     :root {
       --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --accent: #38bdf8;
@@ -17,12 +17,12 @@
     }
     .container {
       background: var(--card); padding: 2rem; border-radius: 12px;
-      border: 1px solid var(--border); width: 100%; max-width: 500px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      border: 1px solid var(--border); width: 100%; max-width: 550px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
     }
-    h1 { margin: 0 0 1.5rem; text-align: center; font-size: 1.5rem; }
+    h1 { margin: 0 0 1.5rem; text-align: center; font-size: 1.4rem; }
     .upload-area {
-      border: 2px dashed var(--border); padding: 2rem; text-align: center;
+      border: 2px dashed var(--border); padding: 1.5rem; text-align: center;
       border-radius: 8px; cursor: pointer; transition: 0.2s;
     }
     .upload-area:hover { border-color: var(--accent); background: rgba(56, 189, 248, 0.05); }
@@ -30,48 +30,200 @@
     .btn {
       display: inline-block; padding: 10px 20px; background: var(--accent);
       color: #000; font-weight: 600; border-radius: 6px; text-decoration: none;
-      cursor: pointer; transition: 0.2s; margin-top: 1rem;
+      cursor: pointer; transition: 0.2s; margin-top: 1rem; border: none; font-size: 1rem;
     }
-    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-    .btn.hidden { display: none; }
-    #status {
-      margin-top: 1.5rem; padding: 1rem; background: rgba(0,0,0,0.2);
-      border-radius: 6px; font-family: monospace; font-size: 0.9rem;
-      white-space: pre-wrap; min-height: 60px;
+    .btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .hidden { display: none !important; }
+    
+    .preview-section { margin-top: 1.5rem; text-align: center; }
+    .preview-img {
+      max-height: 200px; max-width: 100%; border-radius: 6px;
+      margin: 10px 0; object-fit: contain; background: #000;
     }
-    .config { margin-top: 1rem; font-size: 0.85rem; color: #94a3b8; }
-    .config label { display: block; margin-bottom: 0.5rem; }
-    .config input {
-      background: #0f172a; border: 1px solid var(--border); color: var(--text);
-      padding: 4px 8px; border-radius: 4px; width: 80px; text-align: center;
+    .preview-img.large { max-height: 450px; border: 2px solid var(--success); }
+    .meta { font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.5rem; }
+
+    .log-section { margin-top: 1.5rem; }
+    .log-box {
+      background: #0b1120; color: #94a3b8; font-family: monospace;
+      padding: 1rem; border-radius: 6px; max-height: 280px; overflow-y: auto;
+      font-size: 0.85rem; line-height: 1.4; border: 1px solid var(--border);
     }
+    .log-box div { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .log-box div.success { color: var(--success); font-weight: bold; }
+    .log-box div.stalled { color: var(--warn); }
+    .log-box div.error { color: #ef4444; }
+
+    .result-section { margin-top: 1.5rem; text-align: center; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🖼️ Linear Image Optimizer</h1>
+    <h1>🖼️ Auto Linear Image Optimizer</h1>
     
     <label class="upload-area" for="fileInput">
       📁 Click to upload image (PNG, JPG, WebP, etc.)
       <input type="file" id="fileInput" accept="image/*">
     </label>
 
-    <div class="config">
-      <label>Target Size (bytes): <input type="number" id="targetSize" value="512"></label>
-      <label>Quality Step: <input type="number" id="qualityStep" value="10"></label>
-      <label>Dimension Step: <input type="number" id="dimStep" value="0.1" step="0.01"></label>
+    <div id="previewSection" class="preview-section hidden">
+      <p class="meta" id="originalInfo"></p>
+      <img id="originalPreview" class="preview-img" alt="Original Preview">
+      <button id="convertBtn" class="btn">🔄 Convert & Optimize</button>
     </div>
 
-    <div id="status">Waiting for image...</div>
-    <a id="downloadLink" class="btn hidden" download>⬇️ Download Optimized Image</a>
+    <div id="logSection" class="log-section hidden">
+      <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">📜 Optimization Steps</h3>
+      <div id="logOutput" class="log-box"></div>
+    </div>
+
+    <div id="resultSection" class="result-section hidden">
+      <h3 style="margin: 0 0 0.5rem; font-size: 1rem;">✅ Optimized Result</h3>
+      <img id="finalPreview" class="preview-img large" alt="Final Preview">
+      <a id="downloadLink" class="btn">⬇️ Download Final Image</a>
+    </div>
   </div>
 
   <script>
     const fileInput = document.getElementById('fileInput');
-    const statusEl = document.getElementById('status');
+    const previewSection = document.getElementById('previewSection');
+    const originalPreview = document.getElementById('originalPreview');
+    const originalInfo = document.getElementById('originalInfo');
+    const convertBtn = document.getElementById('convertBtn');
+    const logSection = document.getElementById('logSection');
+    const logOutput = document.getElementById('logOutput');
+    const resultSection = document.getElementById('resultSection');
+    const finalPreview = document.getElementById('finalPreview');
     const downloadLink = document.getElementById('downloadLink');
 
-    // UI Helpers
+    let currentFile = null;
+
+    // 1. Handle Upload & Show Preview
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      currentFile = file;
+      const url = URL.createObjectURL(file);
+      originalPreview.src = url;
+      originalInfo.textContent = `${file.name} | ${(file.size/1024).toFixed(1)} KB | ${file.type.split('/')[1].toUpperCase()}`;
+      
+      previewSection.classList.remove('hidden');
+      logSection.classList.add('hidden');
+      resultSection.classList.add('hidden');
+      convertBtn.disabled = false;
+    });
+
+    // 2. Handle Conversion & Show Steps
+    convertBtn.addEventListener('click', async () => {
+      if (!currentFile) return;
+      convertBtn.disabled = true;
+      logSection.classList.remove('hidden');
+      resultSection.classList.add('hidden');
+      logOutput.innerHTML = '';
+
+      // Hardcoded optimization parameters (no user control)
+      const options = {
+        targetSizeBytes: 512,
+        qualityStep: 10,
+        dimensionStep: 0.1,
+        maxIterations: 20,
+        stallThreshold: 50,
+        maxStalls: 5
+      };
+
+      const img = await loadImage(currentFile);
+      const baseName = currentFile.name.replace(/\.[^/.]+$/, "");
+      const outExt = '.jpg';
+
+      let prevFileSize = Infinity;
+      let stallCount = 0;
+      let finalResult = null;
+
+      for (let i = 1; i <= options.maxIterations; i++) {
+        const reductionFactor = Math.max(0.0, 1.0 - (i * options.dimensionStep));
+        const newW = Math.max(1, Math.floor(img.width * reductionFactor));
+        const newH = Math.max(1, Math.floor(img.height * reductionFactor));
+        const currentQuality = Math.max(1, 100 - (i * options.qualityStep));
+
+        const outputName = `${baseName}_v${i}${outExt}`;
+
+        // Yield to UI thread so the log updates smoothly
+        await new Promise(r => setTimeout(r, 0));
+
+        const blob = await canvasToBlob(img, newW, newH, currentQuality);
+        const fileSize = blob.size;
+
+        // Update log
+        const logLine = document.createElement('div');
+        logLine.textContent = `[${i}] ${newW}x${newH} | Q:${currentQuality} | ${fileSize} bytes`;
+        logOutput.appendChild(logLine);
+        logOutput.scrollTop = logOutput.scrollHeight;
+
+        if (fileSize <= options.targetSizeBytes) {
+          logLine.classList.add('success');
+          finalResult = { blob, name: outputName, size: fileSize };
+          break;
+        }
+
+        if (Math.abs(fileSize - prevFileSize) < options.stallThreshold) {
+          stallCount++;
+          if (stallCount >= options.maxStalls) {
+            logLine.classList.add('stalled');
+            finalResult = { blob, name: outputName, size: fileSize };
+            break;
+          }
+        } else {
+          stallCount = 0;
+        }
+        prevFileSize = fileSize;
+      }
+
+      if (finalResult) {
+        const url = URL.createObjectURL(finalResult.blob);
+        finalPreview.src = url;
+        resultSection.classList.remove('hidden');
+        downloadLink.href = url;
+        downloadLink.download = finalResult.name;
+      } else {
+        logOutput.innerHTML += `<div class="error">⚠️ Could not reach ≤${options.targetSizeBytes} bytes within limits.</div>`;
+      }
+      convertBtn.disabled = false;
+    });
+
+    // Browser API Helpers
+    function loadImage(file) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    function canvasToBlob(img, w, h, quality) {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        
+        // High-quality resizing (Lanczos equivalent)
+        ctx.imageSmoothingQuality = 'high';
+        
+        // JPEG doesn't support transparency. Fill with white background.
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        
+        // quality is 0-1 for toBlob, Python uses 0-100
+        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality / 100);
+      });
+    }
+  </script>
+</body>
+</html>
     function updateStatus(msg, size = null) {
       statusEl.textContent = msg + (size !== null ? ` | ${size} bytes` : '');
     }
