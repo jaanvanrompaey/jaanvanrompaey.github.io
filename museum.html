@@ -485,13 +485,21 @@
   </div>
 
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    // ✅ FIXED: Correct ESM import path for Supabase v2
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js';
 
     // =============================================
     // SUPABASE CONFIGURATION
     // =============================================
-    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
-    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    // ⚠️ REPLACE THESE WITH YOUR ACTUAL CREDENTIALS FROM SUPABASE DASHBOARD
+    const SUPABASE_URL = 'https://atcbncgpnhpogjnklwut.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0Y2JuY2dwbmhwb2dqbmtsd3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NTkzMzEsImV4cCI6MjEwNDQzNTMzMX0.2CowrwZ0tA8t1HYoT-xVeYV6tVY9jgnmhfnPV3Z0Hzs';
+
+    // Guard against placeholder values
+    if (SUPABASE_URL.includes('YOUR_PROJECT_ID') || SUPABASE_ANON_KEY.includes('YOUR_SUPABASE_ANON_KEY')) {
+      console.error('❌ Missing Supabase credentials. Replace YOUR_PROJECT_ID and YOUR_SUPABASE_ANON_KEY with your actual values from Settings → API.');
+      showToast('Setup Error: Replace Supabase credentials in the code.');
+    }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -529,7 +537,7 @@
 
         if (error) {
           console.error('Error loading gallery:', error);
-          showToast('Failed to load collection.');
+          showToast('Failed to load collection. Check credentials & policies.');
           return;
         }
 
@@ -640,7 +648,7 @@
 
         if (uploadError) {
           console.error('Storage upload error:', uploadError);
-          showToast('Upload failed. Check Supabase config.');
+          showToast('Upload failed. Check Supabase config & policies.');
           submitBtn.disabled = false;
           submitBtn.textContent = 'SUBMIT WORK';
           return;
@@ -665,7 +673,7 @@
 
         if (dbError) {
           console.error('Database insert error:', dbError);
-          showToast('Database save failed.');
+          showToast('Database save failed. Check policies.');
           submitBtn.disabled = false;
           submitBtn.textContent = 'SUBMIT WORK';
           return;
@@ -793,7 +801,6 @@
       });
     }
 
-    // EXACT ORIGINAL EVENT LISTENER STRUCTURE (WITH SAFETY WRAPPER)
     fileInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -884,7 +891,6 @@
       } catch (e) {
         console.error('Optimization failed:', e);
         showToast('Optimization failed: ' + e.message);
-        goBack();
       }
     });
 
