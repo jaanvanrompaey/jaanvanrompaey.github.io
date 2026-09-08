@@ -27,7 +27,6 @@
       overflow: hidden;
     }
 
-    /* Header */
     header {
       padding: 20px;
       border-bottom: var(--border-width) solid var(--border-color);
@@ -55,7 +54,6 @@
       opacity: 0.5;
     }
 
-    /* Main Layout */
     main {
       flex: 1;
       display: flex;
@@ -103,12 +101,9 @@
       color: var(--color-text);
     }
 
-    /* Hidden Input */
-    #fileInput {
-      display: none;
-    }
+    #fileInput { display: none; }
 
-    /* === NEW GALLERY SECTION === */
+    /* === GALLERY SECTION === */
     .gallery-container {
       flex: 1;
       display: flex;
@@ -125,19 +120,8 @@
       flex-shrink: 0;
     }
 
-    .gallery-header h2 {
-      margin: 0;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-weight: 800;
-    }
-
-    .gallery-count {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      opacity: 0.5;
-    }
+    .gallery-header h2 { margin: 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; }
+    .gallery-count { font-size: 0.7rem; text-transform: uppercase; opacity: 0.5; }
 
     .gallery-grid {
       display: grid;
@@ -150,18 +134,9 @@
       padding-bottom: 10px;
     }
 
-    .gallery-grid::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .gallery-grid::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .gallery-grid::-webkit-scrollbar-thumb {
-      background: #000;
-      border-radius: 2px;
-    }
+    .gallery-grid::-webkit-scrollbar { width: 4px; }
+    .gallery-grid::-webkit-scrollbar-track { background: transparent; }
+    .gallery-grid::-webkit-scrollbar-thumb { background: #000; border-radius: 2px; }
 
     .gallery-item {
       position: relative;
@@ -172,17 +147,8 @@
       aspect-ratio: 1 / 1;
     }
 
-    .gallery-item:hover {
-      transform: scale(1.02);
-      box-shadow: 4px 4px 0 #000;
-    }
-
-    .gallery-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+    .gallery-item:hover { transform: scale(1.02); box-shadow: 4px 4px 0 #000; }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
     .gallery-item-overlay {
       position: absolute;
@@ -200,13 +166,8 @@
       align-items: flex-end;
     }
 
-    .gallery-item-size {
-      font-weight: 700;
-    }
-
-    .gallery-item-date {
-      opacity: 0.5;
-    }
+    .gallery-item-size { font-weight: 700; }
+    .gallery-item-date { opacity: 0.5; }
 
     .gallery-empty {
       display: flex;
@@ -219,14 +180,9 @@
       opacity: 0.4;
     }
 
-    .gallery-empty p {
-      margin: 0;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+    .gallery-empty p { margin: 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
 
-    /* === GALLERY / STEPS STATE === */
+    /* === PROCESSING STATE === */
     #galleryState {
       display: none;
       flex: 1;
@@ -249,169 +205,49 @@
       flex-shrink: 0;
     }
 
-    .steps-row::-webkit-scrollbar {
-      display: none;
-    }
+    .steps-row::-webkit-scrollbar { display: none; }
+    .step-slot img { object-fit: contain; display: block; border: 1px solid #000; }
+    .step-label { width: 100%; margin-top: 5px; font-size: 0.7rem; text-transform: uppercase; text-align: center; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .step-slot img {
-      object-fit: contain;
-      display: block;
-      border: 1px solid #000;
-    }
+    .bottom-section { display: flex; height: 55%; position: relative; flex: 1; }
+    #finalArea { position: absolute; display: flex; flex-direction: column; align-items: flex-start; }
+    #finalImage { min-height: 50vh; object-fit: contain; width: auto; height: auto; display: block; border: 1px solid #000; }
+    #finalLabel { margin-top: 10px; font-size: 0.8rem; text-transform: uppercase; text-align: left; }
+    #submitArea { position: absolute; bottom: var(--corner-pad); right: var(--corner-pad); }
+    #backBtn { position: absolute; top: 0; left: var(--corner-pad); z-index: 10; font-size: 0.7rem; padding: 8px 16px; }
 
-    .step-label {
-      width: 100%;
-      margin-top: 5px;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      text-align: center;
-      line-height: 1.2;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .bottom-section {
-      display: flex;
-      height: 55%;
-      position: relative;
-      flex: 1;
-    }
-
-    #finalArea {
-      position: absolute;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    #finalImage {
-      min-height: 50vh;
-      object-fit: contain;
-      width: auto;
-      height: auto;
-      display: block;
-      border: 1px solid #000;
-    }
-
-    #finalLabel {
-      margin-top: 10px;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      text-align: left;
-    }
-
-    #submitArea {
-      position: absolute;
-      bottom: var(--corner-pad);
-      right: var(--corner-pad);
-    }
-
-    #backBtn {
-      position: absolute;
-      top: 0;
-      left: var(--corner-pad);
-      z-index: 10;
-      font-size: 0.7rem;
-      padding: 8px 16px;
-    }
-
-    .spinner {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid var(--color-text);
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      vertical-align: middle;
-      margin-right: 8px;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--color-text); border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: var(--color-text);
-      color: var(--color-bg);
-      padding: 12px 24px;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      border: var(--border-width) solid var(--color-text);
-      transition: transform 0.3s ease;
-      z-index: 1000;
-      pointer-events: none;
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: var(--color-text); color: var(--color-bg); padding: 12px 24px;
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+      border: var(--border-width) solid var(--color-text); transition: transform 0.3s ease;
+      z-index: 1000; pointer-events: none;
     }
-
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
-    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
 
     .lightbox {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(255, 255, 255, 0.97);
-      z-index: 999;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: none; position: fixed; inset: 0; background: rgba(255, 255, 255, 0.97);
+      z-index: 999; flex-direction: column; align-items: center; justify-content: center;
       padding: 80px 40px 40px;
     }
-
-    .lightbox.open {
-      display: flex;
-    }
-
-    .lightbox img {
-      max-width: 90%;
-      max-height: 70vh;
-      object-fit: contain;
-      border: var(--border-width) solid var(--color-text);
-    }
-
-    .lightbox-info {
-      margin-top: 15px;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      text-align: center;
-    }
-
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 90%; max-height: 70vh; object-fit: contain; border: var(--border-width) solid var(--color-text); }
+    .lightbox-info { margin-top: 15px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; text-align: center; }
     .lightbox-close {
-      position: absolute;
-      top: 20px;
-      right: 30px;
-      background: transparent;
-      border: var(--border-width) solid var(--color-text);
-      padding: 8px 16px;
-      font-family: var(--font-main);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      cursor: pointer;
-      letter-spacing: 1px;
+      position: absolute; top: 20px; right: 30px; background: transparent;
+      border: var(--border-width) solid var(--color-text); padding: 8px 16px;
+      font-family: var(--font-main); font-size: 0.7rem; text-transform: uppercase;
+      cursor: pointer; letter-spacing: 1px;
     }
-
-    .lightbox-close:hover {
-      background: var(--color-text);
-      color: var(--color-bg);
-    }
+    .lightbox-close:hover { background: var(--color-text); color: var(--color-bg); }
 
     @media (max-width: 600px) {
-      :root {
-        --corner-pad: 20px;
-      }
+      :root { --corner-pad: 20px; }
       h1 { font-size: 1rem; }
-      .gallery-grid {
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 10px;
-      }
+      .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
       .steps-row { gap: 20px; }
     }
   </style>
@@ -432,52 +268,36 @@
       <input type="file" id="fileInput" accept="image/*">
     </div>
 
-    <!-- 2. New Gallery Section -->
+    <!-- 2. Gallery Section -->
     <div class="gallery-container" id="galleryContainer">
       <div class="gallery-header">
         <h2>Collection</h2>
         <span class="gallery-count" id="galleryCount">0 WORKS</span>
       </div>
-      <div class="gallery-grid" id="galleryGrid">
-        <!-- Gallery items injected by JS -->
-      </div>
+      <div class="gallery-grid" id="galleryGrid"></div>
       <div class="gallery-empty" id="galleryEmpty">
         <p>No works in the collection yet.</p>
         <p>Upload an image to begin optimising.</p>
       </div>
     </div>
 
-    <!-- 3. Processing / Gallery State -->
+    <!-- 3. Processing State -->
     <div id="galleryState">
       <button class="museum-btn" id="backBtn" onclick="goBack()">← BACK</button>
-
-      <!-- The Dynamic Steps Row -->
-      <div class="steps-row" id="stepsRow">
-        <!-- Steps injected by JS -->
-      </div>
-
-      <!-- Bottom Section -->
+      <div class="steps-row" id="stepsRow"></div>
       <div class="bottom-section">
-        <!-- Final Result -->
         <div id="finalArea">
           <img id="finalImage" alt="Final Result" style="display:none;">
           <div id="finalLabel">AWAITING WORK...</div>
         </div>
-
-        <!-- Submit Button -->
         <div id="submitArea">
-          <button class="museum-btn" id="submitBtn" onclick="submitWork()">
-            SUBMIT WORK
-          </button>
+          <button class="museum-btn" id="submitBtn" onclick="submitWork()">SUBMIT WORK</button>
         </div>
       </div>
     </div>
   </main>
 
-  <!-- Toast -->
   <div class="toast" id="toast"></div>
-
-  <!-- Lightbox -->
   <div class="lightbox" id="lightbox">
     <button class="lightbox-close" onclick="closeLightbox()">CLOSE</button>
     <img id="lightboxImage" src="" alt="View">
@@ -485,32 +305,24 @@
   </div>
 
   <script type="module">
-    // ✅ FIXED: Official Supabase v2 ESM import path (fixes 404)
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
+    // ✅ FIXED: Official Supabase v2 ESM bundle (fixes binding error)
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js'
 
-    // =============================================
-    // SUPABASE CONFIGURATION
-    // =============================================
-    // ⚠️ MUST REPLACE THESE WITH YOUR ACTUAL CREDENTIALS FROM SUPABASE DASHBOARD
+    // ⚠️ REPLACE THESE TWO LINES WITH YOUR ACTUAL CREDENTIALS FROM SUPABASE DASHBOARD
     const SUPABASE_URL = 'https://atcbncgpnhpogjnklwut.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0Y2JuY2dwbmhwb2dqbmtsd3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NTkzMzEsImV4cCI6MjEwNDQzNTMzMX0.2CowrwZ0tA8t1HYoT-xVeYV6tVY9jgnmhfnPV3Z0Hzs';
 
-    // 🔒 CRITICAL GUARD: Stops execution if placeholders remain
+    // 🔒 CRITICAL GUARD: Stops execution if placeholders remain (prevents 403 floods)
     if (SUPABASE_URL.includes('YOUR_PROJECT_ID') || SUPABASE_ANON_KEY.includes('YOUR_SUPABASE_ANON_KEY')) {
-      console.error('❌ CRITICAL: Replace SUPABASE_URL and SUPABASE_ANON_KEY with your actual credentials from Settings → API in Supabase.');
-      alert('🛑 Setup Error: Please replace YOUR_PROJECT_ID and YOUR_SUPABASE_ANON_KEY in the code with your actual Supabase credentials.');
-      // Stop execution to prevent 403 errors
+      console.error('❌ Missing Supabase credentials. Replace the placeholder URL and Key with your actual project credentials from Settings → API.');
+      alert('🛑 Setup Required: Replace YOUR_PROJECT_ID and YOUR_SUPABASE_ANON_KEY in the code with your actual Supabase credentials.');
       throw new Error('Missing credentials');
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     const ARTWORKS_TABLE = 'artworks';
     const ARTWORKS_BUCKET = 'museum-artworks';
 
-    // =============================================
-    // DOM REFERENCES
-    // =============================================
     const fileInput = document.getElementById('fileInput');
     const uploadState = document.getElementById('uploadState');
     const galleryState = document.getElementById('galleryState');
@@ -532,65 +344,34 @@
 
     async function loadGallery() {
       try {
-        const { data, error } = await supabase
-          .from(ARTWORKS_TABLE)
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          console.error('Error loading gallery:', error);
-          showToast('Failed to load collection. Check credentials & policies.');
-          return;
-        }
-
+        const { data, error } = await supabase.from(ARTWORKS_TABLE).select('*').order('created_at', { ascending: false });
+        if (error) { console.error('Error loading gallery:', error); showToast('Failed to load collection. Check credentials & policies.'); return; }
         artworks = data || [];
         renderGallery();
-      } catch (e) {
-        console.error('Gallery load error:', e);
-      }
+      } catch (e) { console.error('Gallery load error:', e); }
     }
 
     function renderGallery() {
       galleryGrid.innerHTML = '';
-
-      if (artworks.length === 0) {
-        galleryEmpty.style.display = 'flex';
-        galleryCount.textContent = '0 WORKS';
-        return;
-      }
-
+      if (artworks.length === 0) { galleryEmpty.style.display = 'flex'; galleryCount.textContent = '0 WORKS'; return; }
       galleryEmpty.style.display = 'none';
       galleryCount.textContent = `${artworks.length} WORK${artworks.length !== 1 ? 'S' : ''}`;
 
       artworks.forEach(artwork => {
         const item = document.createElement('div');
         item.className = 'gallery-item';
-
         const img = document.createElement('img');
-        img.src = artwork.image_url;
-        img.alt = artwork.name || 'Untitled';
-        img.loading = 'lazy';
-
+        img.src = artwork.image_url; img.alt = artwork.name || 'Untitled'; img.loading = 'lazy';
         const overlay = document.createElement('div');
         overlay.className = 'gallery-item-overlay';
-
         const sizeLabel = document.createElement('span');
         sizeLabel.className = 'gallery-item-size';
-        const safeSize = Number(artwork.file_size) || 0; // int8/BigInt fix
-        sizeLabel.textContent = formatBytes(safeSize);
-
+        sizeLabel.textContent = formatBytes(Number(artwork.file_size) || 0);
         const dateLabel = document.createElement('span');
         dateLabel.className = 'gallery-item-date';
-        const d = new Date(artwork.created_at);
-        dateLabel.textContent = d.toLocaleDateString('en-GB', {
-          day: '2-digit', month: 'short', year: '2-digit'
-        });
-
-        overlay.appendChild(sizeLabel);
-        overlay.appendChild(dateLabel);
-        item.appendChild(img);
-        item.appendChild(overlay);
-
+        dateLabel.textContent = new Date(artwork.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
+        overlay.appendChild(sizeLabel); overlay.appendChild(dateLabel);
+        item.appendChild(img); item.appendChild(overlay);
         item.addEventListener('click', () => openLightbox(artwork));
         galleryGrid.appendChild(item);
       });
@@ -598,9 +379,7 @@
 
     function formatBytes(bytes) {
       if (bytes === 0) return '0 B';
-      const k = 1024;
-      const sizes = ['B', 'KB', 'MB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      const k = 1024, sizes = ['B', 'KB', 'MB'], i = Math.floor(Math.log(bytes) / Math.log(k));
       return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     }
 
@@ -611,193 +390,78 @@
       lightbox.classList.add('open');
     }
 
-    function closeLightbox() {
-      lightbox.classList.remove('open');
-    }
-
-    lightbox.addEventListener('click', (e) => {
-      if (e.target === lightbox) closeLightbox();
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeLightbox();
-    });
+    function closeLightbox() { lightbox.classList.remove('open'); }
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
 
     async function submitWork() {
       const finalSrc = finalImage.src;
-      if (!finalSrc || finalImage.style.display === 'none') {
-        showToast('No work to submit.');
-        return;
-      }
-
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="spinner"></span>UPLOADING...';
-
+      if (!finalSrc || finalImage.style.display === 'none') { showToast('No work to submit.'); return; }
+      submitBtn.disabled = true; submitBtn.innerHTML = '<span class="spinner"></span>UPLOADING...';
       try {
-        const response = await fetch(finalSrc);
-        const blob = await response.blob();
+        const response = await fetch(finalSrc); const blob = await response.blob();
         const baseName = (finalImage.alt || 'untitled').replace(/[^a-zA-Z0-9_-]/g, '');
-        const timestamp = Date.now();
-        const fileName = `${baseName || 'work'}_${timestamp}.jpg`;
+        const fileName = `${baseName || 'work'}_${Date.now()}.jpg`;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from(ARTWORKS_BUCKET)
-          .upload(fileName, blob, {
-            contentType: 'image/jpeg',
-            cacheControl: '3600',
-            upsert: false
-          });
+        const { data: uploadData, error: uploadError } = await supabase.storage.from(ARTWORKS_BUCKET).upload(fileName, blob, { contentType: 'image/jpeg', cacheControl: '3600', upsert: false });
+        if (uploadError) { console.error('Storage upload error:', uploadError); showToast('Upload failed. Check Supabase config & policies.'); submitBtn.disabled = false; submitBtn.textContent = 'SUBMIT WORK'; return; }
 
-        if (uploadError) {
-          console.error('Storage upload error:', uploadError);
-          showToast('Upload failed. Check Supabase config & policies.');
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'SUBMIT WORK';
-          return;
-        }
-
-        const { data: urlData } = supabase.storage
-          .from(ARTWORKS_BUCKET)
-          .getPublicUrl(fileName);
-
+        const { data: urlData } = supabase.storage.from(ARTWORKS_BUCKET).getPublicUrl(fileName);
         const publicUrl = urlData.publicUrl;
 
-        const { data: dbData, error: dbError } = await supabase
-          .from(ARTWORKS_TABLE)
-          .insert([{
-            name: baseName || 'Untitled',
-            file_size: blob.size,
-            image_url: publicUrl,
-            storage_path: uploadData.path
-          }])
-          .select()
-          .single();
+        const { data: dbData, error: dbError } = await supabase.from(ARTWORKS_TABLE).insert([{ name: baseName || 'Untitled', file_size: blob.size, image_url: publicUrl, storage_path: uploadData.path }]).select().single();
+        if (dbError) { console.error('Database insert error:', dbError); showToast('Database save failed. Check policies.'); submitBtn.disabled = false; submitBtn.textContent = 'SUBMIT WORK'; return; }
 
-        if (dbError) {
-          console.error('Database insert error:', dbError);
-          showToast('Database save failed. Check policies.');
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'SUBMIT WORK';
-          return;
-        }
-
-        const newArtwork = {
-          id: dbData.id,
-          name: dbData.name,
-          file_size: dbData.file_size,
-          image_url: dbData.image_url,
-          created_at: dbData.created_at
-        };
-
-        artworks.unshift(newArtwork);
+        artworks.unshift({ id: dbData.id, name: dbData.name, file_size: dbData.file_size, image_url: dbData.image_url, created_at: dbData.created_at });
         renderGallery();
-
         showToast('Work submitted to the museum archive.');
-
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'SUBMIT WORK';
+        submitBtn.disabled = false; submitBtn.textContent = 'SUBMIT WORK';
         goBack();
-
-      } catch (e) {
-        console.error('Submit error:', e);
-        showToast('Submission failed.');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'SUBMIT WORK';
-      }
+      } catch (e) { console.error('Submit error:', e); showToast('Submission failed.'); submitBtn.disabled = false; submitBtn.textContent = 'SUBMIT WORK'; }
     }
 
     window.goBack = function() {
-      galleryState.style.display = 'none';
-      uploadState.style.display = 'flex';
-      galleryContainer.style.display = 'flex';
-      loadGallery();
+      galleryState.style.display = 'none'; uploadState.style.display = 'flex'; galleryContainer.style.display = 'flex'; loadGallery();
     };
 
-    function showToast(message) {
-      toast.textContent = message;
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
-    }
+    function showToast(message) { toast.textContent = message; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 3000); }
 
     function adjustStepLayout() {
       const slots = stepsRow.querySelectorAll('.step-slot');
       if (slots.length === 0) return;
-
-      const viewportW = window.innerWidth;
-      const viewportH = window.innerHeight;
-      const headerEl = document.querySelector('header');
-      const headerHeight = headerEl ? headerEl.offsetHeight : 0;
-
-      const paddingX = 80;
+      const viewportW = window.innerWidth, viewportH = window.innerHeight;
+      const headerHeight = document.querySelector('header').offsetHeight || 0;
+      const paddingX = 80, paddingYTop = 40;
       const availableWidth = viewportW - paddingX;
-
-      const paddingYTop = 40;
       const availableHeight = viewportH - headerHeight - paddingYTop - 40;
-
       const maxH = Math.min(0.4 * viewportH, Math.max(100, availableHeight));
-
       let totalWidth = 0;
-      slots.forEach(img => {
-        const aspectRatio = img.naturalWidth / (img.naturalHeight || 1);
-        totalWidth += (maxH * aspectRatio);
-      });
-
+      slots.forEach(img => { const aspectRatio = img.naturalWidth / (img.naturalHeight || 1); totalWidth += (maxH * aspectRatio); });
       totalWidth += (slots.length - 1) * 40;
-
       let finalH = maxH;
-      if (totalWidth > availableWidth) {
-        finalH = (availableWidth - (slots.length - 1) * 40) / (totalWidth / maxH);
-      }
-
-      slots.forEach(img => {
-        img.style.height = `${finalH}px`;
-        img.style.width = 'auto';
-      });
+      if (totalWidth > availableWidth) finalH = (availableWidth - (slots.length - 1) * 40) / (totalWidth / maxH);
+      slots.forEach(img => { img.style.height = `${finalH}px`; img.style.width = 'auto'; });
     }
 
     window.addEventListener('resize', adjustStepLayout);
 
     function canvasToBlob(canvas, mimeType = 'image/jpeg', quality = 0.85) {
-      return new Promise((resolve, reject) => {
-        canvas.toBlob((blob) => {
-          if (blob) resolve(blob);
-          else reject(new Error('Canvas toBlob failed.'));
-        }, mimeType, quality);
-      });
+      return new Promise((resolve, reject) => { canvas.toBlob((blob) => { if (blob) resolve(blob); else reject(new Error('Canvas toBlob failed.')); }, mimeType, quality); });
     }
 
     function renderBlockStyle(img, targetW, targetH, blockSize = 8) {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const gridW = Math.max(1, Math.ceil(targetW / blockSize));
-      const gridH = Math.max(1, Math.ceil(targetH / blockSize));
-
-      const offCanvas = document.createElement('canvas');
-      offCanvas.width = gridW;
-      offCanvas.height = gridH;
-      const offCtx = offCanvas.getContext('2d');
-      offCtx.imageSmoothingEnabled = false;
-      offCtx.drawImage(img, 0, 0, gridW, gridH);
-
-      canvas.width = targetW;
-      canvas.height = targetH;
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(offCanvas, 0, 0, targetW, targetH);
+      const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+      const gridW = Math.max(1, Math.ceil(targetW / blockSize)); const gridH = Math.max(1, Math.ceil(targetH / blockSize));
+      const offCanvas = document.createElement('canvas'); offCanvas.width = gridW; offCanvas.height = gridH;
+      const offCtx = offCanvas.getContext('2d'); offCtx.imageSmoothingEnabled = false; offCtx.drawImage(img, 0, 0, gridW, gridH);
+      canvas.width = targetW; canvas.height = targetH; ctx.imageSmoothingEnabled = false; ctx.drawImage(offCanvas, 0, 0, targetW, targetH);
       return canvas;
     }
 
     function loadImage(file) {
       return new Promise((resolve, reject) => {
         const img = new Image();
-        img.onload = () => {
-          if (img.naturalWidth === 0 || img.naturalHeight === 0) {
-            reject(new Error('Invalid image.'));
-          } else {
-            resolve(img);
-          }
-        };
+        img.onload = () => { if (img.naturalWidth === 0 || img.naturalHeight === 0) reject(new Error('Invalid image.')); else resolve(img); };
         img.onerror = () => reject(new Error('Failed to load image.'));
         img.src = URL.createObjectURL(file);
       });
@@ -817,22 +481,15 @@
       try {
         const img = await loadImage(file);
         const baseName = file.name.replace(/\.[^/.]+$/, "");
-        const origW = img.naturalWidth;
-        const origH = img.naturalHeight;
-        const initialSize = file.size;
+        const origW = img.naturalWidth, origH = img.naturalHeight, initialSize = file.size;
         const targetSize = 512;
-
         const ratio = targetSize / initialSize;
-        const numSteps = ratio >= 1
-          ? 1
-          : Math.max(4, Math.min(6, 4 + Math.floor(Math.log10(1 / ratio) * 1.2)));
+        const numSteps = ratio >= 1 ? 1 : Math.max(4, Math.min(6, 4 + Math.floor(Math.log10(1 / ratio) * 1.2)));
 
         let finalResult = null;
-
         for (let i = 1; i <= numSteps; i++) {
           const progress = i / numSteps;
           const targetForStep = initialSize * Math.pow(ratio, progress);
-
           const sizeFactor = targetForStep / initialSize;
           const dimScale = Math.max(0.05, Math.pow(sizeFactor, 0.5));
           const qualityScale = Math.max(0.01, sizeFactor);
@@ -845,33 +502,21 @@
           const blob = await canvasToBlob(blockCanvas, 'image/jpeg', currentQuality / 100);
           const fileSize = blob.size;
 
-          const slot = document.createElement('div');
-          slot.className = 'step-slot';
-
-          const slotImg = document.createElement('img');
-          slotImg.src = URL.createObjectURL(blob);
-          slotImg.onload = adjustStepLayout;
-
-          const slotLabel = document.createElement('div');
-          slotLabel.className = 'step-label';
-          slotLabel.innerText = `STEP ${i}: ${fileSize} BYTES`;
-
-          slot.appendChild(slotImg);
-          slot.appendChild(slotLabel);
+          const slot = document.createElement('div'); slot.className = 'step-slot';
+          const slotImg = document.createElement('img'); slotImg.src = URL.createObjectURL(blob); slotImg.onload = adjustStepLayout;
+          const slotLabel = document.createElement('div'); slotLabel.className = 'step-label'; slotLabel.innerText = `STEP ${i}: ${fileSize} BYTES`;
+          slot.appendChild(slotImg); slot.appendChild(slotLabel);
           stepsRow.appendChild(slot);
-
           adjustStepLayout();
 
           finalResult = { blob, name: `${baseName}_optimized.jpg`, size: fileSize };
           if (fileSize <= targetSize) break;
-
           await new Promise(r => setTimeout(r, 600));
         }
 
         if (finalResult) {
           const url = URL.createObjectURL(finalResult.blob);
-          finalImage.src = url;
-          finalImage.style.display = 'block';
+          finalImage.src = url; finalImage.style.display = 'block';
           finalLabel.innerText = `FINAL STEP: ${finalResult.size} BYTES`;
 
           const stepSlots = stepsRow.querySelectorAll('.step-slot');
@@ -880,20 +525,11 @@
             if (idx >= 0) {
               const label = stepSlots[idx].querySelector('.step-label').innerText;
               const size = parseInt(label.match(/\d+/)[0]);
-              if (Math.abs(size - finalResult.size) < 50) {
-                URL.revokeObjectURL(stepSlots[idx].querySelector('img').src);
-                stepsRow.removeChild(stepSlots[idx]);
-              } else {
-                break;
-              }
+              if (Math.abs(size - finalResult.size) < 50) { URL.revokeObjectURL(stepSlots[idx].querySelector('img').src); stepsRow.removeChild(stepSlots[idx]); } else { break; }
             }
           }
         }
-
-      } catch (e) {
-        console.error('Optimization failed:', e);
-        showToast('Optimization failed: ' + e.message);
-      }
+      } catch (e) { console.error('Optimization failed:', e); showToast('Optimization failed: ' + e.message); }
     });
 
     loadGallery();
