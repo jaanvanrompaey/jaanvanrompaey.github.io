@@ -490,8 +490,8 @@
     // =============================================
     // SUPABASE CONFIGURATION
     // =============================================
-    const SUPABASE_URL = 'https://atcbncgpnhpogjnklwut.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0Y2JuY2dwbmhwb2dqbmtsd3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NTkzMzEsImV4cCI6MjEwNDQzNTMzMX0.2CowrwZ0tA8t1HYoT-xVeYV6tVY9jgnmhfnPV3Z0Hzs';
+    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -511,6 +511,7 @@
     const galleryGrid = document.getElementById('galleryGrid');
     const galleryEmpty = document.getElementById('galleryEmpty');
     const galleryCount = document.getElementById('galleryCount');
+    const galleryContainer = document.getElementById('galleryContainer');
     const submitBtn = document.getElementById('submitBtn');
     const toast = document.getElementById('toast');
     const lightbox = document.getElementById('lightbox');
@@ -698,6 +699,7 @@
     window.goBack = function() {
       galleryState.style.display = 'none';
       uploadState.style.display = 'flex';
+      galleryContainer.style.display = 'flex';
       loadGallery();
     };
 
@@ -715,7 +717,8 @@
 
       const viewportW = window.innerWidth;
       const viewportH = window.innerHeight;
-      const headerHeight = document.querySelector('header').offsetHeight;
+      const headerEl = document.querySelector('header');
+      const headerHeight = headerEl ? headerEl.offsetHeight : 0;
 
       const paddingX = 80;
       const availableWidth = viewportW - paddingX;
@@ -723,7 +726,7 @@
       const paddingYTop = 40;
       const availableHeight = viewportH - headerHeight - paddingYTop - 40;
 
-      const maxH = Math.min(0.4 * viewportH, availableHeight);
+      const maxH = Math.min(0.4 * viewportH, Math.max(100, availableHeight));
 
       let totalWidth = 0;
       slots.forEach(img => {
@@ -790,13 +793,14 @@
       });
     }
 
-    // EXACT ORIGINAL EVENT LISTENER STRUCTURE
+    // EXACT ORIGINAL EVENT LISTENER STRUCTURE (WITH SAFETY WRAPPER)
     fileInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
       uploadState.style.display = 'none';
       galleryState.style.display = 'flex';
+      galleryContainer.style.display = 'none';
       stepsRow.innerHTML = '';
       finalImage.style.display = 'none';
       finalLabel.innerText = 'OPTIMIZING...';
@@ -878,7 +882,8 @@
         }
 
       } catch (e) {
-        showToast('Error: ' + e.message);
+        console.error('Optimization failed:', e);
+        showToast('Optimization failed: ' + e.message);
         goBack();
       }
     });
