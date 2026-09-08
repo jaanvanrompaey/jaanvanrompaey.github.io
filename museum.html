@@ -34,7 +34,12 @@
     main { flex: 1; display: flex; flex-direction: column; padding: 40px; gap: 15px; overflow: hidden; }
 
     /* === UPLOAD / GALLERY STATE === */
-    #uploadState { flex: 1; display: flex; position: relative; }
+    #uploadState {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;  /* <-- ADD THIS: constrain children so they can't break out */
+    }
 
     /* --- Fixed upload button (bottom-right, always visible) --- */
     #uploadBtnWrapper {
