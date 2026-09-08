@@ -321,7 +321,8 @@
       throw new Error('Missing credentials');
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ✅ FIXED: Renamed local variable to 'sb' to avoid shadowing the global 'supabase'
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const ARTWORKS_TABLE = 'artworks';
     const ARTWORKS_BUCKET = 'museum-artworks';
 
@@ -346,7 +347,8 @@
 
     async function loadGallery() {
       try {
-        const { data, error } = await supabase.from(ARTWORKS_TABLE).select('*').order('created_at', { ascending: false });
+        // ✅ FIXED: Changed supabase.from to sb.from
+        const { data, error } = await sb.from(ARTWORKS_TABLE).select('*').order('created_at', { ascending: false });
         if (error) { console.error('Error loading gallery:', error); showToast('Failed to load collection. Check credentials & policies.'); return; }
         artworks = data || [];
         renderGallery();
@@ -405,13 +407,16 @@
         const baseName = (finalImage.alt || 'untitled').replace(/[^a-zA-Z0-9_-]/g, '');
         const fileName = `${baseName || 'work'}_${Date.now()}.jpg`;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage.from(ARTWORKS_BUCKET).upload(fileName, blob, { contentType: 'image/jpeg', cacheControl: '3600', upsert: false });
+        // ✅ FIXED: Changed supabase.storage to sb.storage
+        const { data: uploadData, error: uploadError } = await sb.storage.from(ARTWORKS_BUCKET).upload(fileName, blob, { contentType: 'image/jpeg', cacheControl: '3600', upsert: false });
         if (uploadError) { console.error('Storage upload error:', uploadError); showToast('Upload failed. Check Supabase config & policies.'); submitBtn.disabled = false; submitBtn.textContent = 'SUBMIT WORK'; return; }
 
-        const { data: urlData } = supabase.storage.from(ARTWORKS_BUCKET).getPublicUrl(fileName);
+        // ✅ FIXED: Changed supabase.storage to sb.storage
+        const { data: urlData } = sb.storage.from(ARTWORKS_BUCKET).getPublicUrl(fileName);
         const publicUrl = urlData.publicUrl;
 
-        const { data: dbData, error: dbError } = await supabase.from(ARTWORKS_TABLE).insert([{ name: baseName || 'Untitled', file_size: blob.size, image_url: publicUrl, storage_path: uploadData.path }]).select().single();
+        // ✅ FIXED: Changed supabase.from to sb.from
+        const { data: dbData, error: dbError } = await sb.from(ARTWORKS_TABLE).insert([{ name: baseName || 'Untitled', file_size: blob.size, image_url: publicUrl, storage_path: uploadData.path }]).select().single();
         if (dbError) { console.error('Database insert error:', dbError); showToast('Database save failed. Check policies.'); submitBtn.disabled = false; submitBtn.textContent = 'SUBMIT WORK'; return; }
 
         artworks.unshift({ id: dbData.id, name: dbData.name, file_size: dbData.file_size, image_url: dbData.image_url, created_at: dbData.created_at });
