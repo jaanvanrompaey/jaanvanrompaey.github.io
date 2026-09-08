@@ -485,20 +485,22 @@
   </div>
 
   <script type="module">
-    // ✅ FIXED: Correct ESM import path for Supabase v2
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js';
+    // ✅ FIXED: Official Supabase v2 ESM import path (fixes 404)
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
 
     // =============================================
     // SUPABASE CONFIGURATION
     // =============================================
-    // ⚠️ REPLACE THESE WITH YOUR ACTUAL CREDENTIALS FROM SUPABASE DASHBOARD
+    // ⚠️ MUST REPLACE THESE WITH YOUR ACTUAL CREDENTIALS FROM SUPABASE DASHBOARD
     const SUPABASE_URL = 'https://atcbncgpnhpogjnklwut.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0Y2JuY2dwbmhwb2dqbmtsd3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NTkzMzEsImV4cCI6MjEwNDQzNTMzMX0.2CowrwZ0tA8t1HYoT-xVeYV6tVY9jgnmhfnPV3Z0Hzs';
 
-    // Guard against placeholder values
+    // 🔒 CRITICAL GUARD: Stops execution if placeholders remain
     if (SUPABASE_URL.includes('YOUR_PROJECT_ID') || SUPABASE_ANON_KEY.includes('YOUR_SUPABASE_ANON_KEY')) {
-      console.error('❌ Missing Supabase credentials. Replace YOUR_PROJECT_ID and YOUR_SUPABASE_ANON_KEY with your actual values from Settings → API.');
-      showToast('Setup Error: Replace Supabase credentials in the code.');
+      console.error('❌ CRITICAL: Replace SUPABASE_URL and SUPABASE_ANON_KEY with your actual credentials from Settings → API in Supabase.');
+      alert('🛑 Setup Error: Please replace YOUR_PROJECT_ID and YOUR_SUPABASE_ANON_KEY in the code with your actual Supabase credentials.');
+      // Stop execution to prevent 403 errors
+      throw new Error('Missing credentials');
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
