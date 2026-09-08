@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MUSEUM OF OPTIMISED ART</title>
+  <!-- ✅ FIXED: Official Supabase UMD build (fixes 404 import error) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     /* === MUSEUM AESTHETIC === */
     :root {
@@ -304,9 +306,9 @@
     <div class="lightbox-info" id="lightboxInfo"></div>
   </div>
 
-  <script type="module">
-    // ✅ FIXED: Official Supabase v2 ESM bundle (fixes binding error)
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js'
+  <script>
+    // ✅ FIXED: Extract createClient from the global Supabase object
+    const { createClient } = window.supabase;
 
     // ⚠️ REPLACE THESE TWO LINES WITH YOUR ACTUAL CREDENTIALS FROM SUPABASE DASHBOARD
     const SUPABASE_URL = 'https://atcbncgpnhpogjnklwut.supabase.co';
