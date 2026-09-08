@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MUSEUM OF OPTIMISED ART</title>
-  <!-- ✅ FIXED: Official Supabase UMD build (fixes 404 import error) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     /* === MUSEUM AESTHETIC === */
@@ -18,186 +17,81 @@
     }
 
     body {
-      margin: 0;
-      padding: 0;
-      font-family: var(--font-main);
-      background: var(--color-bg);
-      color: var(--color-text);
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      margin: 0; padding: 0; font-family: var(--font-main);
+      background: var(--color-bg); color: var(--color-text);
+      height: 100vh; display: flex; flex-direction: column; overflow: hidden;
     }
 
     header {
-      padding: 20px;
-      border-bottom: var(--border-width) solid var(--border-color);
-      text-align: center;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-left: var(--corner-pad);
-      padding-right: var(--corner-pad);
+      padding: 20px; border-bottom: var(--border-width) solid var(--border-color);
+      text-align: center; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding-left: var(--corner-pad); padding-right: var(--corner-pad);
     }
+    h1 { margin: 0; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; }
+    .header-subtitle { font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.5; }
 
-    h1 {
-      margin: 0;
-      font-size: 1.5rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-weight: 800;
-    }
+    main { flex: 1; display: flex; flex-direction: column; padding: 40px; gap: 15px; overflow: hidden; }
 
-    .header-subtitle {
-      font-size: 0.7rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      opacity: 0.5;
-    }
-
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 40px;
-      gap: 15px;
-      overflow: hidden;
-    }
-
-    /* === ORIGINAL UPLOAD STATE (EXACTLY AS REQUESTED) === */
-    #uploadState {
-      display: flex;
-      flex: 1;
-      justify-content: flex-end;
-      align-items: flex-end;
-      padding-bottom: var(--corner-pad);
-      padding-right: var(--corner-pad);
-    }
+    /* === UPLOAD / GALLERY STATE === */
+    #uploadState { flex: 1; display: flex; position: relative; padding: var(--corner-pad); }
+    #uploadBtnWrapper { position: absolute; bottom: var(--corner-pad); left: var(--corner-pad); z-index: 10; }
 
     .museum-btn {
-      background: transparent;
-      border: var(--border-width) solid var(--border-color);
-      padding: 15px 30px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-      font-family: var(--font-main);
-      letter-spacing: 1px;
+      background: transparent; border: var(--border-width) solid var(--border-color);
+      padding: 15px 30px; font-size: 1.2rem; font-weight: bold; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s, color 0.2s; font-family: var(--font-main); letter-spacing: 1px;
     }
-
-    .museum-btn:hover {
-      background: var(--color-text);
-      color: var(--color-bg);
-    }
-
-    .museum-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-
-    .museum-btn:disabled:hover {
-      background: transparent;
-      color: var(--color-text);
-    }
-
+    .museum-btn:hover { background: var(--color-text); color: var(--color-bg); }
+    .museum-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .museum-btn:disabled:hover { background: transparent; color: var(--color-text); }
     #fileInput { display: none; }
 
-    /* === GALLERY SECTION === */
-    .gallery-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      margin-bottom: 10px;
-    }
-
-    .gallery-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 15px;
-      flex-shrink: 0;
-    }
-
+    .gallery-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .gallery-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; flex-shrink: 0; }
     .gallery-header h2 { margin: 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; }
     .gallery-count { font-size: 0.7rem; text-transform: uppercase; opacity: 0.5; }
 
     .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 15px;
-      flex: 1;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: #000 transparent;
-      padding-bottom: 10px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px; flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #000 transparent; padding-bottom: 10px;
     }
-
     .gallery-grid::-webkit-scrollbar { width: 4px; }
     .gallery-grid::-webkit-scrollbar-track { background: transparent; }
     .gallery-grid::-webkit-scrollbar-thumb { background: #000; border-radius: 2px; }
 
-    .gallery-item {
-      position: relative;
-      border: var(--border-width) solid var(--border-color);
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-      aspect-ratio: 1 / 1;
-    }
-
-    .gallery-item:hover { transform: scale(1.02); box-shadow: 4px 4px 0 #000; }
+    .gallery-item { position: relative; overflow: hidden; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; aspect-ratio: 1 / 1; }
+    .gallery-item:hover { transform: scale(1.02); }
     .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
     .gallery-item-overlay {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(255, 255, 255, 0.95);
-      border-top: var(--border-width) solid var(--border-color);
-      padding: 6px 8px;
-      font-size: 0.55rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
+      position: absolute; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 1);
+      padding: 6px 10px; font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px;
+      display: flex; justify-content: flex-start; align-items: flex-end; gap: 8px;
     }
+    .gallery-item-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 85%; }
+    .gallery-item-date { opacity: 0.5; white-space: nowrap; }
 
-    .gallery-item-size { font-weight: 700; }
-    .gallery-item-date { opacity: 0.5; }
-
-    .gallery-empty {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      flex: 1;
-      text-align: center;
-      gap: 15px;
-      opacity: 0.4;
-    }
-
+    .gallery-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; gap: 15px; opacity: 0.4; }
     .gallery-empty p { margin: 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
 
-    /* === PROCESSING STATE === */
-    #galleryState {
+    /* === OPTIMIZATION STATE (EXACTLY ORIGINAL) === */
+    /* Gallery / Steps Grid */
+   #galleryState {
       display: none;
       flex: 1;
       flex-direction: column;
       gap: 40px;
       height: 100%;
       position: relative;
-      overflow: hidden;
     }
 
+    /* The Row of Steps */
     .steps-row {
       display: flex;
+	max-height: 40vh;
       gap: 40px;
+      /* Changed from width: 100% to fit-content to shrink-wrap the content */
       width: fit-content;
       padding-right: var(--corner-pad);
       overflow-x: auto;
@@ -207,16 +101,70 @@
       flex-shrink: 0;
     }
 
-    .steps-row::-webkit-scrollbar { display: none; }
-    .step-slot img { object-fit: contain; display: block; border: 1px solid #000; }
-    .step-label { width: 100%; margin-top: 5px; font-size: 0.7rem; text-transform: uppercase; text-align: center; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .steps-row::-webkit-scrollbar {
+      display: none;
+    }
 
-    .bottom-section { display: flex; height: 55%; position: relative; flex: 1; }
-    #finalArea { position: absolute; display: flex; flex-direction: column; align-items: flex-start; }
-    #finalImage { min-height: 50vh; object-fit: contain; width: auto; height: auto; display: block; border: 1px solid #000; }
-    #finalLabel { margin-top: 10px; font-size: 0.8rem; text-transform: uppercase; text-align: left; }
-    #submitArea { position: absolute; bottom: var(--corner-pad); right: var(--corner-pad); }
-    #backBtn { position: absolute; top: 0; left: var(--corner-pad); z-index: 10; font-size: 0.7rem; padding: 8px 16px; }
+    /* Individual Step Slot Images */
+    .step-slot img {
+      object-fit: contain;
+      display: block;
+      border: 1px solid #000;
+    }
+
+    .step-label {
+      width: 100%;
+      margin-top: 5px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Bottom Section (Final + Submit) */
+    .bottom-section {
+      display: flex;
+      height: 55%;
+      position: relative;
+      flex: 1;
+    }
+
+    /* Final Result Area */
+    #finalArea {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+	bottom: 0px;
+	left: 0px;
+      align-items: flex-start;
+    }
+
+    #finalImage {
+      /* Force the image to stretch to fill 50% viewport height */
+      height: 50vh;
+      object-fit: contain;
+      width: auto;
+      display: block;
+      border: 1px solid #000;
+    }
+
+    #finalLabel {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      text-align: left;
+    }
+
+    /* Submit Button */
+    #submitArea {
+      position: absolute;
+      bottom: 0px;
+      right: 0px;
+    }
+    #backBtn { position: absolute; top: 0; left: 0; z-index: 10; font-size: 0.7rem; padding: 8px 16px; }
 
     .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--color-text); border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 8px; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -230,13 +178,9 @@
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
 
-    .lightbox {
-      display: none; position: fixed; inset: 0; background: rgba(255, 255, 255, 0.97);
-      z-index: 999; flex-direction: column; align-items: center; justify-content: center;
-      padding: 80px 40px 40px;
-    }
+    .lightbox { display: none; position: fixed; inset: 0; background: rgba(255, 255, 255, 0.97); z-index: 999; flex-direction: column; align-items: center; justify-content: center; padding: 80px 40px 40px; }
     .lightbox.open { display: flex; }
-    .lightbox img { max-width: 90%; max-height: 70vh; object-fit: contain; border: var(--border-width) solid var(--color-text); }
+    .lightbox img { max-width: 90%; height: 70vh; object-fit: contain; border: var(--border-width) solid var(--color-text); }
     .lightbox-info { margin-top: 15px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; text-align: center; }
     .lightbox-close {
       position: absolute; top: 20px; right: 30px; background: transparent;
@@ -245,6 +189,21 @@
       cursor: pointer; letter-spacing: 1px;
     }
     .lightbox-close:hover { background: var(--color-text); color: var(--color-bg); }
+
+    /* === NAME MODAL === */
+    .name-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(255, 255, 255, 0.92); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; }
+    .name-modal-overlay.open { display: flex; }
+    .name-modal { background: var(--color-bg); border: var(--border-width) solid var(--border-color); padding: 40px; max-width: 440px; width: 90%; text-align: center; }
+    .name-modal h3 { margin: 0 0 20px 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; }
+    .name-modal input {
+      width: 100%; padding: 12px 16px; font-size: 1rem; font-family: var(--font-main);
+      border: var(--border-width) solid var(--border-color); background: transparent;
+      color: var(--color-text); text-transform: uppercase; letter-spacing: 1px; box-sizing: border-box; outline: none;
+    }
+    .name-modal input:focus { background: var(--color-text); color: var(--color-bg); }
+    .name-modal-actions { display: flex; gap: 12px; justify-content: center; margin-top: 20px; }
+    .name-modal-actions .museum-btn { font-size: 0.8rem; padding: 10px 24px; }
+    .name-modal-hint { margin-top: 10px; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.4; }
 
     @media (max-width: 600px) {
       :root { --corner-pad: 20px; }
@@ -262,30 +221,28 @@
   </header>
 
   <main>
-    <!-- 1. Initial Upload State (EXACTLY AS ORIGINAL) -->
+    <!-- 1. Initial Upload / Gallery State -->
     <div id="uploadState">
-      <label for="fileInput" class="museum-btn">
-        UPLOAD IMAGE
-      </label>
-      <input type="file" id="fileInput" accept="image/*">
-    </div>
-
-    <!-- 2. Gallery Section -->
-    <div class="gallery-container" id="galleryContainer">
-      <div class="gallery-header">
-        <h2>Collection</h2>
-        <span class="gallery-count" id="galleryCount">0 WORKS</span>
+      <div id="uploadBtnWrapper">
+        <label for="fileInput" class="museum-btn">UPLOAD IMAGE</label>
+        <input type="file" id="fileInput" accept="image/*">
       </div>
-      <div class="gallery-grid" id="galleryGrid"></div>
-      <div class="gallery-empty" id="galleryEmpty">
-        <p>No works in the collection yet.</p>
-        <p>Upload an image to begin optimising.</p>
+      <div class="gallery-container" id="galleryContainer">
+        <div class="gallery-header">
+          <h2>Collection</h2>
+          <span class="gallery-count" id="galleryCount">0 WORKS</span>
+        </div>
+        <div class="gallery-grid" id="galleryGrid"></div>
+        <div class="gallery-empty" id="galleryEmpty">
+          <p>No works in the collection yet.</p>
+          <p>Upload an image to begin optimising.</p>
+        </div>
       </div>
     </div>
 
-    <!-- 3. Processing State -->
+    <!-- 2. OPTIMIZATION STATE (EXACTLY AS ORIGINAL) -->
     <div id="galleryState">
-      <button class="museum-btn" id="backBtn" onclick="goBack()">← BACK</button>
+
       <div class="steps-row" id="stepsRow"></div>
       <div class="bottom-section">
         <div id="finalArea">
@@ -293,11 +250,25 @@
           <div id="finalLabel">AWAITING WORK...</div>
         </div>
         <div id="submitArea">
-          <button class="museum-btn" id="submitBtn" onclick="submitWork()">SUBMIT WORK</button>
+          <button class="museum-btn" id="submitBtn" onclick="openNameModal()">SUBMIT WORK</button>
         </div>
+
       </div>
     </div>
   </main>
+
+  <!-- NAME INPUT MODAL -->
+  <div class="name-modal-overlay" id="nameModal">
+    <div class="name-modal">
+      <h3>Name This Work</h3>
+      <input type="text" id="nameInput" placeholder="Untitled" maxlength="60" autocomplete="off">
+      <p class="name-modal-hint">Press Enter to confirm or click Submit</p>
+      <div class="name-modal-actions">
+        <button class="museum-btn" onclick="cancelNameModal()">CANCEL</button>
+        <button class="museum-btn" onclick="confirmNameSubmit()">CONFIRM</button>
+      </div>
+    </div>
+  </div>
 
   <div class="toast" id="toast"></div>
   <div class="lightbox" id="lightbox">
@@ -307,21 +278,9 @@
   </div>
 
   <script>
-    // ✅ FIXED: Extract createClient from the global Supabase object
     const { createClient } = window.supabase;
-
-    // ⚠️ REPLACE THESE TWO LINES WITH YOUR ACTUAL CREDENTIALS FROM SUPABASE DASHBOARD
     const SUPABASE_URL = 'https://atcbncgpnhpogjnklwut.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0Y2JuY2dwbmhwb2dqbmtsd3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NTkzMzEsImV4cCI6MjEwNDQzNTMzMX0.2CowrwZ0tA8t1HYoT-xVeYV6tVY9jgnmhfnPV3Z0Hzs';
-
-    // 🔒 CRITICAL GUARD: Stops execution if placeholders remain (prevents 403 floods)
-    if (SUPABASE_URL.includes('YOUR_PROJECT_ID') || SUPABASE_ANON_KEY.includes('YOUR_SUPABASE_ANON_KEY')) {
-      console.error('❌ Missing Supabase credentials. Replace the placeholder URL and Key with your actual project credentials from Settings → API.');
-      alert('🛑 Setup Required: Replace YOUR_PROJECT_ID and YOUR_SUPABASE_ANON_KEY in the code with your actual Supabase credentials.');
-      throw new Error('Missing credentials');
-    }
-
-    // ✅ FIXED: Renamed local variable to 'sb' to avoid shadowing the global 'supabase'
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const ARTWORKS_TABLE = 'artworks';
     const ARTWORKS_BUCKET = 'museum-artworks';
@@ -343,11 +302,13 @@
     const lightboxImage = document.getElementById('lightboxImage');
     const lightboxInfo = document.getElementById('lightboxInfo');
 
+    const nameModal = document.getElementById('nameModal');
+    const nameInput = document.getElementById('nameInput');
+
     let artworks = [];
 
     async function loadGallery() {
       try {
-        // ✅ FIXED: Changed supabase.from to sb.from
         const { data, error } = await sb.from(ARTWORKS_TABLE).select('*').order('created_at', { ascending: false });
         if (error) { console.error('Error loading gallery:', error); showToast('Failed to load collection. Check credentials & policies.'); return; }
         artworks = data || [];
@@ -366,16 +327,22 @@
         item.className = 'gallery-item';
         const img = document.createElement('img');
         img.src = artwork.image_url; img.alt = artwork.name || 'Untitled'; img.loading = 'lazy';
+        
         const overlay = document.createElement('div');
         overlay.className = 'gallery-item-overlay';
-        const sizeLabel = document.createElement('span');
-        sizeLabel.className = 'gallery-item-size';
-        sizeLabel.textContent = formatBytes(Number(artwork.file_size) || 0);
+        
+        const nameLabel = document.createElement('span');
+        nameLabel.className = 'gallery-item-name';
+        nameLabel.textContent = artwork.name || 'Untitled';
+        
         const dateLabel = document.createElement('span');
         dateLabel.className = 'gallery-item-date';
         dateLabel.textContent = new Date(artwork.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
-        overlay.appendChild(sizeLabel); overlay.appendChild(dateLabel);
-        item.appendChild(img); item.appendChild(overlay);
+
+        overlay.appendChild(nameLabel);
+        overlay.appendChild(dateLabel);
+        item.appendChild(img);
+        item.appendChild(overlay);
         item.addEventListener('click', () => openLightbox(artwork));
         galleryGrid.appendChild(item);
       });
@@ -398,60 +365,112 @@
     lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
 
-    async function submitWork() {
+    function openNameModal() {
       const finalSrc = finalImage.src;
       if (!finalSrc || finalImage.style.display === 'none') { showToast('No work to submit.'); return; }
-      submitBtn.disabled = true; submitBtn.innerHTML = '<span class="spinner"></span>UPLOADING...';
-      try {
-        const response = await fetch(finalSrc); const blob = await response.blob();
-        const baseName = (finalImage.alt || 'untitled').replace(/[^a-zA-Z0-9_-]/g, '');
-        const fileName = `${baseName || 'work'}_${Date.now()}.jpg`;
+      
+      const defaultName = (finalImage.alt || 'Untitled').replace(/[^a-zA-Z0-9 _-]/g, '');
+      nameInput.value = defaultName || 'Untitled';
+      nameModal.classList.add('open');
+      setTimeout(() => { nameInput.focus(); nameInput.select(); }, 100);
+    }
 
-        // ✅ FIXED: Changed supabase.storage to sb.storage
+    function cancelNameModal() { nameModal.classList.remove('open'); }
+
+    function confirmNameSubmit() {
+      const name = nameInput.value.trim() || 'Untitled';
+      nameModal.classList.remove('open');
+      submitWork(name);
+    }
+
+    nameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); confirmNameSubmit(); }
+      if (e.key === 'Escape') cancelNameModal();
+    });
+
+    async function submitWork(name) {
+      const finalSrc = finalImage.src;
+      if (!finalSrc || finalImage.style.display === 'none') { showToast('No work to submit.'); return; }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>UPLOADING...';
+
+      try {
+        const response = await fetch(finalSrc);
+        const blob = await response.blob();
+
+        const safeName = (name || 'Untitled').replace(/[^a-zA-Z0-9 _-]/g, '');
+        const fileName = safeName.replace(/ /g, '_') + '_' + Date.now() + '.jpg';
+
         const { data: uploadData, error: uploadError } = await sb.storage.from(ARTWORKS_BUCKET).upload(fileName, blob, { contentType: 'image/jpeg', cacheControl: '3600', upsert: false });
         if (uploadError) { console.error('Storage upload error:', uploadError); showToast('Upload failed. Check Supabase config & policies.'); submitBtn.disabled = false; submitBtn.textContent = 'SUBMIT WORK'; return; }
 
-        // ✅ FIXED: Changed supabase.storage to sb.storage
         const { data: urlData } = sb.storage.from(ARTWORKS_BUCKET).getPublicUrl(fileName);
         const publicUrl = urlData.publicUrl;
 
-        // ✅ FIXED: Changed supabase.from to sb.from
-        const { data: dbData, error: dbError } = await sb.from(ARTWORKS_TABLE).insert([{ name: baseName || 'Untitled', file_size: blob.size, image_url: publicUrl, storage_path: uploadData.path }]).select().single();
+        const { data: dbData, error: dbError } = await sb.from(ARTWORKS_TABLE).insert([{ name: safeName || 'Untitled', file_size: blob.size, image_url: publicUrl, storage_path: uploadData.path }]).select().single();
         if (dbError) { console.error('Database insert error:', dbError); showToast('Database save failed. Check policies.'); submitBtn.disabled = false; submitBtn.textContent = 'SUBMIT WORK'; return; }
 
         artworks.unshift({ id: dbData.id, name: dbData.name, file_size: dbData.file_size, image_url: dbData.image_url, created_at: dbData.created_at });
         renderGallery();
         showToast('Work submitted to the museum archive.');
-        submitBtn.disabled = false; submitBtn.textContent = 'SUBMIT WORK';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'SUBMIT WORK';
         goBack();
       } catch (e) { console.error('Submit error:', e); showToast('Submission failed.'); submitBtn.disabled = false; submitBtn.textContent = 'SUBMIT WORK'; }
     }
 
     window.goBack = function() {
-      galleryState.style.display = 'none'; uploadState.style.display = 'flex'; galleryContainer.style.display = 'flex'; loadGallery();
+      galleryState.style.display = 'none'; 
+      uploadState.style.display = 'flex'; 
+      loadGallery();
     };
 
     function showToast(message) { toast.textContent = message; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 3000); }
 
     function adjustStepLayout() {
-      const slots = stepsRow.querySelectorAll('.step-slot');
+      const slots = stepsRow.querySelectorAll('.step-slot img');
       if (slots.length === 0) return;
-      const viewportW = window.innerWidth, viewportH = window.innerHeight;
-      const headerHeight = document.querySelector('header').offsetHeight || 0;
-      const paddingX = 80, paddingYTop = 40;
+
+      const viewportW = window.innerWidth;
+      const viewportH = window.innerHeight;
+      const headerHeight = document.querySelector('header').offsetHeight;
+
+      // Available horizontal space (account for 40px padding on left + right)
+      const paddingX = 80;
       const availableWidth = viewportW - paddingX;
+
+      // Available vertical space for the row
+      const paddingYTop = 40;
       const availableHeight = viewportH - headerHeight - paddingYTop - 40;
-      const maxH = Math.min(0.4 * viewportH, Math.max(100, availableHeight));
+
+      // Determine max height per image (capped by viewport)
+      const maxH = Math.min(0.4 * viewportH, availableHeight);
+
+      // Calculate total width needed if all images used maxH
       let totalWidth = 0;
-      slots.forEach(img => { const aspectRatio = img.naturalWidth / (img.naturalHeight || 1); totalWidth += (maxH * aspectRatio); });
+      slots.forEach(img => {
+        const aspectRatio = img.naturalWidth / (img.naturalHeight || 1);
+        totalWidth += (maxH * aspectRatio);
+      });
+
+      // Add gaps between images
       totalWidth += (slots.length - 1) * 40;
+
+      // If the total width exceeds available width, scale everything down
       let finalH = maxH;
-      if (totalWidth > availableWidth) finalH = (availableWidth - (slots.length - 1) * 40) / (totalWidth / maxH);
-      slots.forEach(img => { img.style.height = `${finalH}px`; img.style.width = 'auto'; });
+      if (totalWidth > availableWidth) {
+        finalH = (availableWidth - (slots.length - 1) * 40) / (totalWidth / maxH);
+      }
+
+      // Apply the computed height to all images (width auto preserves aspect ratio)
+      slots.forEach(img => {
+        img.style.height = `${finalH}px`;
+        img.style.width = 'auto';
+      });
     }
 
     window.addEventListener('resize', adjustStepLayout);
-
     function canvasToBlob(canvas, mimeType = 'image/jpeg', quality = 0.85) {
       return new Promise((resolve, reject) => { canvas.toBlob((blob) => { if (blob) resolve(blob); else reject(new Error('Canvas toBlob failed.')); }, mimeType, quality); });
     }
@@ -480,7 +499,6 @@
 
       uploadState.style.display = 'none';
       galleryState.style.display = 'flex';
-      galleryContainer.style.display = 'none';
       stepsRow.innerHTML = '';
       finalImage.style.display = 'none';
       finalLabel.innerText = 'OPTIMIZING...';
@@ -488,12 +506,16 @@
       try {
         const img = await loadImage(file);
         const baseName = file.name.replace(/\.[^/.]+$/, "");
-        const origW = img.naturalWidth, origH = img.naturalHeight, initialSize = file.size;
+        const origW = img.naturalWidth;
+        const origH = img.naturalHeight;
+        const initialSize = file.size;
         const targetSize = 512;
+
         const ratio = targetSize / initialSize;
         const numSteps = ratio >= 1 ? 1 : Math.max(4, Math.min(6, 4 + Math.floor(Math.log10(1 / ratio) * 1.2)));
 
         let finalResult = null;
+
         for (let i = 1; i <= numSteps; i++) {
           const progress = i / numSteps;
           const targetForStep = initialSize * Math.pow(ratio, progress);
@@ -509,10 +531,17 @@
           const blob = await canvasToBlob(blockCanvas, 'image/jpeg', currentQuality / 100);
           const fileSize = blob.size;
 
-          const slot = document.createElement('div'); slot.className = 'step-slot';
-          const slotImg = document.createElement('img'); slotImg.src = URL.createObjectURL(blob); slotImg.onload = adjustStepLayout;
-          const slotLabel = document.createElement('div'); slotLabel.className = 'step-label'; slotLabel.innerText = `STEP ${i}: ${fileSize} BYTES`;
-          slot.appendChild(slotImg); slot.appendChild(slotLabel);
+          const slot = document.createElement('div');
+          slot.className = 'step-slot';
+          const slotImg = document.createElement('img');
+          slotImg.src = URL.createObjectURL(blob);
+          slotImg.onload = adjustStepLayout;
+          const slotLabel = document.createElement('div');
+          slotLabel.className = 'step-label';
+          slotLabel.innerText = `STEP ${i}: ${fileSize} BYTES`;
+
+          slot.appendChild(slotImg);
+          slot.appendChild(slotLabel);
           stepsRow.appendChild(slot);
           adjustStepLayout();
 
@@ -523,7 +552,9 @@
 
         if (finalResult) {
           const url = URL.createObjectURL(finalResult.blob);
-          finalImage.src = url; finalImage.style.display = 'block';
+          finalImage.src = url;
+          finalImage.style.display = 'block';
+          finalImage.alt = baseName;
           finalLabel.innerText = `FINAL STEP: ${finalResult.size} BYTES`;
 
           const stepSlots = stepsRow.querySelectorAll('.step-slot');
@@ -532,7 +563,10 @@
             if (idx >= 0) {
               const label = stepSlots[idx].querySelector('.step-label').innerText;
               const size = parseInt(label.match(/\d+/)[0]);
-              if (Math.abs(size - finalResult.size) < 50) { URL.revokeObjectURL(stepSlots[idx].querySelector('img').src); stepsRow.removeChild(stepSlots[idx]); } else { break; }
+              if (Math.abs(size - finalResult.size) < 50) {
+                URL.revokeObjectURL(stepSlots[idx].querySelector('img').src);
+                stepsRow.removeChild(stepSlots[idx]);
+              } else { break; }
             }
           }
         }
