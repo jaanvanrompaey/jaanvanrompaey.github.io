@@ -37,8 +37,8 @@
     #uploadState {
       flex: 1;
       display: flex;
-      position: relative;
-      overflow: hidden;  /* <-- ADD THIS: constrain children so they can't break out */
+      flex-direction: column;
+      overflow: hidden;
     }
 
     /* --- Fixed upload button (bottom-right, always visible) --- */
@@ -63,9 +63,9 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      overflow-y: auto;          /* keep container itself from scrolling */
-      padding-right: 20px;       /* room for scrollbar */
-      min-height: 0;
+      overflow: hidden; /* Container does not scroll, grid does */
+      padding-right: 20px;
+      min-height: 0; /* Allow flex child to shrink */
     }
 
     .gallery-header {
@@ -82,11 +82,11 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 15px;
-      overflow-y: auto;
+      overflow-y: auto; /* Grid scrolls */
       scrollbar-width: thin;
       scrollbar-color: #000 transparent;
       padding-bottom: 10px;
-      max-height: 100%;  
+      /* Removed flex: 1 and max-height: 100% */
     }
     .gallery-grid::-webkit-scrollbar { width: 4px; }
     .gallery-grid::-webkit-scrollbar-track { background: transparent; }
