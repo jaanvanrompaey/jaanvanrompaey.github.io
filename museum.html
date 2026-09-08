@@ -31,7 +31,7 @@
     h1 { margin: 0; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; }
     .header-subtitle { font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.5; }
 
-    main { flex: 1; display: flex; flex-direction: column; padding: 40px; gap: 15px; overflow: hidden; }
+    main { flex: 1; display: flex; flex-direction: column; padding: var(--corner-pad); gap: 15px; overflow: hidden; }
 
     /* === UPLOAD / GALLERY STATE === */
     #uploadState {
@@ -45,7 +45,7 @@
     #uploadBtnWrapper {
       position: fixed;
       bottom: 60px;
-      right: 40px;
+      right: var(--corner-pad);
       z-index: 100;
     }
 
@@ -121,7 +121,7 @@
       display: none;
       flex: 1;
       flex-direction: column;
-      gap: 40px;
+      gap: var(--corner-pad);
       height: 100%;
       position: relative;
     }
@@ -129,7 +129,7 @@
     .steps-row {
       display: flex;
       max-height: 40vh;
-      gap: 40px;
+      gap: var(--corner-pad);
       width: fit-content;
       padding-right: var(--corner-pad);
       overflow-x: auto;
@@ -208,7 +208,7 @@
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
 
-    .lightbox { display: none; position: fixed; inset: 0; background: rgba(255, 255, 255, 0.97); z-index: 999; flex-direction: column; align-items: center; justify-content: center; padding: 80px 40px 40px; }
+    .lightbox { display: none; position: fixed; inset: 0; background: rgba(255, 255, 255, 0.97); z-index: 999; flex-direction: column; align-items: center; justify-content: center; padding: 80px var(--corner-pad) var(--corner-pad); }
     .lightbox.open { display: flex; }
     .lightbox img { max-width: 90%; height: 70vh; object-fit: contain; border: var(--border-width) solid var(--color-text); }
     .lightbox-info { margin-top: 15px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; text-align: center; }
@@ -249,7 +249,6 @@
 
   <header>
     <h1>MUSEUM OF OPTIMISED ART</h1>
-    <span class="header-subtitle" id="headerSubtitle">EST. 2025</span>
   </header>
 
   <main>
