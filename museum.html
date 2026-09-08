@@ -35,7 +35,14 @@
 
     /* === UPLOAD / GALLERY STATE === */
     #uploadState { flex: 1; display: flex; position: relative; }
-    #uploadBtnWrapper { position: absolute; bottom: 0px; right: 0px; z-index: 10; }
+
+    /* --- Fixed upload button (bottom-right, always visible) --- */
+    #uploadBtnWrapper {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+    }
 
     .museum-btn {
       background: transparent; border: var(--border-width) solid var(--border-color);
@@ -47,14 +54,33 @@
     .museum-btn:disabled:hover { background: transparent; color: var(--color-text); }
     #fileInput { display: none; }
 
-    .gallery-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .gallery-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; flex-shrink: 0; }
+    .gallery-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;          /* keep container itself from scrolling */
+      padding-right: 20px;       /* room for scrollbar */
+    }
+
+    .gallery-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      flex-shrink: 0;
+    }
     .gallery-header h2 { margin: 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; }
     .gallery-count { font-size: 0.7rem; text-transform: uppercase; opacity: 0.5; }
 
     .gallery-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 15px; flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #000 transparent; padding-bottom: 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #000 transparent;
+      padding-bottom: 10px;
     }
     .gallery-grid::-webkit-scrollbar { width: 4px; }
     .gallery-grid::-webkit-scrollbar-track { background: transparent; }
@@ -72,12 +98,20 @@
     .gallery-item-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 85%; }
     .gallery-item-date { opacity: 0.5; white-space: nowrap; }
 
-    .gallery-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; gap: 15px; opacity: 0.4; }
+    .gallery-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      text-align: center;
+      gap: 15px;
+      opacity: 0.4;
+    }
     .gallery-empty p { margin: 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
 
     /* === OPTIMIZATION STATE (EXACTLY ORIGINAL) === */
-    /* Gallery / Steps Grid */
-   #galleryState {
+    #galleryState {
       display: none;
       flex: 1;
       flex-direction: column;
@@ -86,12 +120,10 @@
       position: relative;
     }
 
-    /* The Row of Steps */
     .steps-row {
       display: flex;
-	max-height: 40vh;
+      max-height: 40vh;
       gap: 40px;
-      /* Changed from width: 100% to fit-content to shrink-wrap the content */
       width: fit-content;
       padding-right: var(--corner-pad);
       overflow-x: auto;
@@ -100,12 +132,8 @@
       -ms-overflow-style: none;
       flex-shrink: 0;
     }
+    .steps-row::-webkit-scrollbar { display: none; }
 
-    .steps-row::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* Individual Step Slot Images */
     .step-slot img {
       object-fit: contain;
       display: block;
@@ -124,7 +152,6 @@
       text-overflow: ellipsis;
     }
 
-    /* Bottom Section (Final + Submit) */
     .bottom-section {
       display: flex;
       height: 55%;
@@ -132,18 +159,16 @@
       flex: 1;
     }
 
-    /* Final Result Area */
     #finalArea {
       position: absolute;
       display: flex;
       flex-direction: column;
-	bottom: 0px;
-	left: 0px;
+      bottom: 0px;
+      left: 0px;
       align-items: flex-start;
     }
 
     #finalImage {
-      /* Force the image to stretch to fill 50% viewport height */
       height: 50vh;
       object-fit: contain;
       width: auto;
@@ -158,7 +183,6 @@
       text-align: left;
     }
 
-    /* Submit Button */
     #submitArea {
       position: absolute;
       bottom: 0px;
@@ -210,6 +234,8 @@
       h1 { font-size: 1rem; }
       .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
       .steps-row { gap: 20px; }
+      #uploadBtnWrapper { bottom: 16px; right: 16px; }
+      .museum-btn { padding: 12px 20px; font-size: 1rem; }
     }
   </style>
 </head>
@@ -223,6 +249,7 @@
   <main>
     <!-- 1. Initial Upload / Gallery State -->
     <div id="uploadState">
+      <!-- Upload button is now FIXED outside of the flex flow -->
       <div id="uploadBtnWrapper">
         <label for="fileInput" class="museum-btn">UPLOAD IMAGE</label>
         <input type="file" id="fileInput" accept="image/*">
@@ -240,7 +267,7 @@
       </div>
     </div>
 
-    <!-- 2. OPTIMIZATION STATE (EXACTLY AS ORIGINAL) -->
+    <!-- 2. OPTIMIZATION STATE -->
     <div id="galleryState">
 
       <div class="steps-row" id="stepsRow"></div>
@@ -436,34 +463,27 @@
       const viewportH = window.innerHeight;
       const headerHeight = document.querySelector('header').offsetHeight;
 
-      // Available horizontal space (account for 40px padding on left + right)
       const paddingX = 80;
       const availableWidth = viewportW - paddingX;
 
-      // Available vertical space for the row
       const paddingYTop = 40;
       const availableHeight = viewportH - headerHeight - paddingYTop - 40;
 
-      // Determine max height per image (capped by viewport)
       const maxH = Math.min(0.4 * viewportH, availableHeight);
 
-      // Calculate total width needed if all images used maxH
       let totalWidth = 0;
       slots.forEach(img => {
         const aspectRatio = img.naturalWidth / (img.naturalHeight || 1);
         totalWidth += (maxH * aspectRatio);
       });
 
-      // Add gaps between images
       totalWidth += (slots.length - 1) * 40;
 
-      // If the total width exceeds available width, scale everything down
       let finalH = maxH;
       if (totalWidth > availableWidth) {
         finalH = (availableWidth - (slots.length - 1) * 40) / (totalWidth / maxH);
       }
 
-      // Apply the computed height to all images (width auto preserves aspect ratio)
       slots.forEach(img => {
         img.style.height = `${finalH}px`;
         img.style.width = 'auto';
