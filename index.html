@@ -20,7 +20,7 @@
       --header-height: 80px;
       --title-size: 20pt;
       --subtitle-size: 12pt;
-      --text-size: 9pt;
+      --text-size: 8.5pt;
       --spacing: 2em;
     }
     a:link {
@@ -118,6 +118,8 @@
       justify-content: center;
       cursor: pointer;
       overflow: hidden;
+      scale: 1;
+      transition: scale 0.2s ease-in-out;
     }
     .image-label {
       position: absolute; bottom: 10px; left: 10px;
@@ -125,6 +127,11 @@
       z-index: 5;
     }
 
+    .project-main-image:hover {
+      scale: 1.005;
+      transition: scale 0.2s ease-in-out;
+    }
+    
     /* FIXED: Thumbnails scale proportionally, never overflow container */
     .thumb-box {
       width: 15%;
@@ -141,6 +148,12 @@
       cursor: pointer;
       overflow: hidden;
       flex-shrink: 0;
+      scale: 1;
+      transition: scale 0.2s ease-in-out;
+    }
+    .thumb-box:hover {
+      scale: 1.04;
+      transition: scale 0.2s ease-in-out;
     }
 
     /* FIXED: Images scale to fit their containers */
@@ -185,7 +198,7 @@
       background-color: rgba(0, 0, 0, 0.6);
       border-radius: 50%;
       z-index: 10;
-      transition: background-color 0.3s;
+      transition: background-color 0.2s;
     }
     .video-thumb::after {
       content: '';
@@ -199,7 +212,7 @@
       border-bottom: 9px solid transparent;
       border-left: 14px solid #fff;
       z-index: 11;
-      transition: border-color 0.3s;
+      transition: border-color 0.2s;
     }
     .video-thumb:hover::before { background-color: #fff; }
     .video-thumb:hover::after { border-left-color: #111; }
@@ -222,6 +235,7 @@
     .project-main-image[data-vimeo-url]:hover::after {
       opacity: 1;
       transform: translate(-35%, -50%) scale(1.1);
+      transition: transform 0.2s;
     }
 
     /* FIXED: Vertical main image handling */
