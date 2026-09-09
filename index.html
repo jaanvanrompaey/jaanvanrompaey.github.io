@@ -402,6 +402,10 @@
         flex: 0 0 calc(50% - 7px);
         max-width: none;
       }
+      /* Handle exactly 2 thumbnails -> 50% width each */
+      .project-thumbnails.layout-2-col .thumb-box {
+        flex: 0 0 calc(50% - 7px);
+      }
       /* ——— END MOBILE THUMBNAIL ROW FIX ——— */
     }
   </style>
@@ -814,25 +818,28 @@
 
       /* ——— MOBILE THUMBNAIL ROW FIX ——— */
       // Ensures thumbnails on mobile always have ≥ 2 per row.
+      // When there are exactly 2 thumbnails, they scale to 50% width each.
       // When there are > 3 thumbnails, the remainder is handled by wrapping the last 2 (or 4) into wider rows.
       function adjustMobileThumbRows() {
         const isMobile = window.innerWidth <= 600;
         document.querySelectorAll('.project-thumbnails').forEach(container => {
           const thumbs = container.querySelectorAll('.thumb-box');
-          // Remove any previous force-new-row classes
+          // Remove any previous classes
+          container.classList.remove('layout-2-col');
           thumbs.forEach(t => t.classList.remove('force-new-row'));
           
-          if (isMobile && thumbs.length > 3) {
-            const remainder = thumbs.length % 3;
-            if (remainder === 2) {
-              // Last row has 2 items. Make them 50% width.
-              const lastTwo = Array.from(thumbs).slice(-2);
-              lastTwo.forEach(t => t.classList.add('force-new-row'));
-            } else if (remainder === 1) {
-              // Last row has 1 item. Move 1 from previous row.
-              // So last 2 rows have 2 items each (50% width).
-              const lastFour = Array.from(thumbs).slice(-4);
-              lastFour.forEach(t => t.classList.add('force-new-row'));
+          if (isMobile) {
+            if (thumbs.length === 2) {
+              container.classList.add('layout-2-col');
+            } else if (thumbs.length > 3) {
+              const remainder = thumbs.length % 3;
+              if (remainder === 2) {
+                const lastTwo = Array.from(thumbs).slice(-2);
+                lastTwo.forEach(t => t.classList.add('force-new-row'));
+              } else if (remainder === 1) {
+                const lastFour = Array.from(thumbs).slice(-4);
+                lastFour.forEach(t => t.classList.add('force-new-row'));
+              }
             }
           }
         });
