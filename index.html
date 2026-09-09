@@ -382,6 +382,27 @@
       .column { padding: 24px 20px; }
       .project-block { margin-bottom: 40px; }
       .project-list { gap: 60px; }
+
+      /* ——— MOBILE THUMBNAIL ROW FIX ——— */
+      .project-thumbnails {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        justify-content: center;
+      }
+      /* Base thumbnail size: 1/3 of the container width minus gaps */
+      .thumb-box {
+        flex: 0 0 calc(33.333% - 10px);
+        height: auto;
+        aspect-ratio: 3 / 2;
+        padding: 0 0; 
+      }
+      /* Force last 2 items into their own row when there are > 3 thumbnails */
+      .thumb-box.force-new-row {
+        flex: 0 0 calc(50% - 7px);
+        max-width: none;
+      }
+      /* ——— END MOBILE THUMBNAIL ROW FIX ——— */
     }
   </style>
 </head>
@@ -657,7 +678,7 @@
           <li class="info-item">
             <span class="info-role">St. Lucas Kunstsecundair Antwerpen</span>
             <span class="info-detail">Industriële Kunsten (Industrial Arts)<br>2022-2024</span>
-            <span class="info-detail">Architecturale en Beeldende Vorming (Architectural and Visual Formation)<br>2021-2022</span>
+            <span class="info-detail">Architectural and Beeldende Vorming (Architectural and Visual Formation)<br>2021-2022</span>
           </li>
         </ul>
       </div>
@@ -791,8 +812,40 @@
         });
       }
 
+      /* ——— MOBILE THUMBNAIL ROW FIX ——— */
+      // Ensures thumbnails on mobile always have ≥ 2 per row.
+      // When there are > 3 thumbnails, the remainder is handled by wrapping the last 2 (or 4) into wider rows.
+      function adjustMobileThumbRows() {
+        const isMobile = window.innerWidth <= 600;
+        document.querySelectorAll('.project-thumbnails').forEach(container => {
+          const thumbs = container.querySelectorAll('.thumb-box');
+          // Remove any previous force-new-row classes
+          thumbs.forEach(t => t.classList.remove('force-new-row'));
+          
+          if (isMobile && thumbs.length > 3) {
+            const remainder = thumbs.length % 3;
+            if (remainder === 2) {
+              // Last row has 2 items. Make them 50% width.
+              const lastTwo = Array.from(thumbs).slice(-2);
+              lastTwo.forEach(t => t.classList.add('force-new-row'));
+            } else if (remainder === 1) {
+              // Last row has 1 item. Move 1 from previous row.
+              // So last 2 rows have 2 items each (50% width).
+              const lastFour = Array.from(thumbs).slice(-4);
+              lastFour.forEach(t => t.classList.add('force-new-row'));
+            }
+          }
+        });
+      }
+      /* ——— END MOBILE THUMBNAIL ROW FIX ——— */
+
       window.addEventListener('load', adjustMainImages);
-      window.addEventListener('resize', adjustMainImages);
+      window.addEventListener('resize', () => {
+        adjustMainImages();
+        adjustMobileThumbRows();
+      });
+      // Initial call after page load
+      setTimeout(adjustMobileThumbRows, 100);
     });
   </script>
 </body>
