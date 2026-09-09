@@ -99,9 +99,9 @@
     .text-column {
       display: flex; flex-direction: column;
     }
-    .project-header { margin-bottom: 10px; }
+    .project-header { margin-bottom: 0px; }
     .project-title { font-size: var(--subtitle-size); font-weight: 500; text-transform: uppercase; }
-    .project-credits { font-size: var(--text-size); color: var(--text-muted); line-height: 1.6; }
+    .project-credits { font-size: var(--text-size); color: var(--text-muted); line-height: 0.5; }
     .project-description { font-size: var(--text-size); line-height: 1.6; color: var(--text-description); }
     .image-column { display: flex; flex-direction: column; gap: 20px; }
 
@@ -333,9 +333,7 @@
       .image-column    { order: 2; }
       .project-credits { order: 3; }
       .project-description { order: 4; }
-      /* ——— END MOBILE PROJECT REORDERING ——— */
 
-      /* FIXED: All images scale to fit viewport width on mobile */
       .project-main-image {
         max-width: 100vw;
         width: 100%;
@@ -349,7 +347,6 @@
         max-width: 100%;
       }
 
-      /* FIXED: Thumbnails wrap and scale on mobile */
       .project-thumbnails {
         justify-content: center;
         width: 100%;
@@ -396,16 +393,15 @@
         aspect-ratio: 3 / 2;
         padding: 0 0; 
       }
-      /* Force last 2 items into their own row when there are > 3 thumbnails */
+
       .thumb-box.force-new-row {
         flex: 0 0 calc(50% - 7px);
         max-width: none;
       }
-      /* Handle exactly 2 thumbnails -> 50% width each */
+
       .project-thumbnails.layout-2-col .thumb-box {
         flex: 0 0 calc(50% - 7px);
       }
-      /* ——— END MOBILE THUMBNAIL ROW FIX ——— */
     }
   </style>
 </head>
