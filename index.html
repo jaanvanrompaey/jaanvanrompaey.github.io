@@ -357,14 +357,15 @@
       }
       .thumb-box {
         flex: 1 1 0;
-        min-width: 80px;
+        min-width: 70px;
         max-width: 200px;
         width: auto;
         height: auto;
         aspect-ratio: 3 / 2;
+        padding: 0 0; 
       }
 
-      .portfolio-title { color: var(--bg-color)}
+      .portfolio-title { visibility: hidden; font-size: 0; height: 0; }
       .lightbox-iframe-wrapper { width: 95vw; max-width: 100%; }
       .lightbox { align-items: center; justify-content: center; padding-top: 0; }
       .lightbox-content { max-width: 95%; max-height: 85vh; }
@@ -381,7 +382,6 @@
       .column { padding: 24px 20px; }
       .project-block { margin-bottom: 40px; }
       .project-list { gap: 60px; }
-      .thumb-box { min-width: 100px; max-width: 160px; }
     }
   </style>
 </head>
