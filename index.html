@@ -7,10 +7,16 @@
   <title> Jaan Van Rompaey</title>
   <style>
     @font-face {
-  font-family: font;
-  src: url(ApfelGrotezk-Regular.woff);
-  font-family: font-bold;
-  src: url(ApfelGrotezk-Fett.woff);
+      font-family: 'font';
+      src: url('ApfelGrotezk-Regular.woff');
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'font-bold';
+      src: url('ApfelGrotezk-Mittel.woff');
+      font-weight: 700;
+      font-style: normal;
     }
     /* ========================================= 1. GLOBAL STYLES ========================================= */
     :root {
@@ -25,10 +31,11 @@
       --font-main: font;
       --font-bold: font-bold;
       --header-height: 80px;
-      --title-size: 20pt;
-      --subtitle-size: 12pt;
-      --text-size: 9pt;
+      --title-size: 24pt;
+      --subtitle-size: 14pt;
+      --text-size: 10pt;
       --spacing: 2em;
+      --spacing-img: 7em;
     }
     a:link {
       color: var(--text-description);
@@ -72,7 +79,7 @@
       display: flex; align-items: center; justify-content: center;
       font-size: var(--text-size); color: var(--text-muted);
     }
-    .portfolio-title { font-size: var(--subtitle-size); font: var(--font-bold); text-transform: uppercase; letter-spacing: 1px; }
+    .portfolio-title { font-size: var(--subtitle-size); font-family: var(--font-bold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
     .header-right { display: flex; gap: var(--spacing); }
     .social-link {
       color: var(--text-color); text-decoration: none;
@@ -107,10 +114,10 @@
       display: flex; flex-direction: column;
     }
     .project-header { margin-bottom: 0px; }
-    .project-title { font-size: var(--subtitle-size); font: var(--font-bold); text-transform: uppercase; }
-    .project-credits { font-size: var(--text-size); color: var(--text-muted); line-height: 1; }
-    .project-description { font-size: var(--text-size); line-height: 1.6; color: var(--text-description); }
-    .image-column { display: flex; flex-direction: column; gap: 20px; }
+    .project-title { font-size: var(--subtitle-size); font-family: var(--font-bold); font-weight: 700; text-transform: uppercase; }
+    .project-credits { font-size: var(--text-size); color: var(--text-muted); line-height: 0.6;}
+    .project-description { font-size: var(--text-size); line-height: 1.6; color: var(--text-description); text-align: justify; text-align-last: left; }
+    .image-column { display: flex; flex-direction: column; gap: 20px; padding-left: var(--spacing-img); }
 
     /* FIXED: Main image now scales to container width, never overflows */
     .project-main-image {
@@ -244,7 +251,7 @@
 
     /* FIXED: Vertical main image handling */
     .project-main-image.vertical-main {
-      max-width: 800px;
+      max-width: 50vh;
       margin: 0;
     }
 
@@ -265,7 +272,7 @@
     .info-list { list-style: none; padding: 0; }
     .info-item { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #333; }
     .info-item:last-child { border-bottom: none; }
-    .info-role { font: var(--font-bold); margin-bottom: 4px; display: block; }
+    .info-role { font-family: var(--font-bold); font-weight: 700; margin-bottom: 4px; display: block; }
     .info-detail { font-size: var(--text-size); color: var(--text-muted); display: block; }
 
     /* ========================================= 6. LIGHTBOX (Fixed & Synchronized) ========================================= */
@@ -297,11 +304,11 @@
     }
     .close-btn {
       position: absolute; top: 20px; right: 30px;
-      color: #fff; font-size: 40px; font: var(--font-bold); cursor: pointer; z-index: 2001;
+      color: #fff; font-size: 40px; font-family: var(--font-bold); font-weight: 700; cursor: pointer; z-index: 2001;
     }
     .prev, .next {
       cursor: pointer; position: absolute; top: 50%; width: auto; padding: 16px;
-      margin-top: -50px; color: white; font: var(--font-bold);; font-size: 24px;
+      margin-top: -50px; color: white; font-family: var(--font-bold); font-weight: 700; font-size: 24px;
       transition: 0.3s; user-select: none;
       touch-action: manipulation;
     }
@@ -310,6 +317,9 @@
 
     /* ========================================= 7. RESPONSIVE (Mobile) ========================================= */
     @media (max-width: 1200px) {
+      :root{
+        --spacing-img: 0em;
+      }
       .layout-container {
         grid-template-columns: 1fr;
         height: auto;
@@ -365,7 +375,7 @@
         aspect-ratio: 3 / 2;
         padding: 0 0; 
       }
-
+      
       .portfolio-title { visibility: hidden; font-size: 0; height: 0; }
       .lightbox-iframe-wrapper { width: 95vw; max-width: 100%; }
       .lightbox { align-items: center; justify-content: center; padding-top: 0; }
@@ -441,7 +451,7 @@
     <!-- LEFT COLUMN: Projects -->
     <aside class="column col-left">
       <ul class="project-list">
-        <div style="font-size: var(--title-size); font: var(--font-bold); text-transform: uppercase; margin-top: -20px; color: var(--text-muted);">Projects</div>
+        <div style="font-size: var(--title-size); font-family: var(--font-bold); font-weight: 700; text-transform: uppercase; margin-top: -20px; color: var(--text-muted);">Projects</div>
 
         <!-- Project 1 -->
         <li class="project-block">
@@ -451,7 +461,7 @@
             </div>
             <div class="project-credits">
               <p>June 16, 2026</p>  
-              <p >Featured in the exhibition "Death of the Music Video(?)" and "Art of Strijp-S"</p>
+              <p>Shown at Death of the Music Video & Art of Strijp-S</p>
               <p>Semester-long project</p>
               <p>Tags: Intervention, Experimental, Hardware</p>
             </div>
@@ -489,7 +499,7 @@
               <div class="project-date">April 14, 2026</div>
             </div>
             <div class="project-credits">
-              <p>Featured in the exhibition "Death of the Music Video(?)"</p>
+              <p>Shown at Death of the Music Video</p>
               <p>Month-long project</p>
               <p>Tags: Research, Information Design, Visualisation</p>
             </div>
@@ -659,9 +669,9 @@
     <!-- RIGHT COLUMN: Bio & Info -->
     <aside class="column col-right">
       <div class="info-section">
-        <div style="font-size: var(--title-size); font: var(--font-bold); text-transform: uppercase; margin-bottom: 20px; margin-top: -6px; color: var(--text-muted);">Information</div>
+        <div style="font-size: var(--title-size); font-family: var(--font-bold); font-weight: 700; text-transform: uppercase; margin-bottom: 20px; margin-top: -6px; color: var(--text-muted);">Information</div>
         <span class="project-title">About Me</span>
-        <p style="font-size: var(--text-size); line-height: 1.5;">
+        <p style="font-size: var(--text-size); line-height: 1.5; text-align: justify; text-align-last: left; ">
           Jaan Van Rompaey is a Belgian designer and artist. His background is in industrial design, architecture, and fine arts, which has founded his approach to design. Interventions and activistic approaches are the basis of his work, often using digital media to explore narratives related to contemporary culture and society.
         </p>
         <p style="font-size: var(--text-size); line-height: 1.5;">
